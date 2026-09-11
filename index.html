@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Katalog Aut Driftowych</title>
+<style>
+:root{
+  --bg:#15171b;
+  --panel:#1c1f24;
+  --panel-2:#22262c;
+  --line:#2c3038;
+  --text:#e9e7e1;
+  --text-dim:#9a9fa8;
+  --text-faint:#666c76;
+  --amber:#d98e2b;
+  --amber-dim:#8a6224;
+  --owned:#4c8c7a;
+  --owned-bg:#1c2b26;
+  --planned-bg:#2a2620;
+  --sindgrid:#c96b6b;
+  --ingrid:#6b9ec9;
+  --astrid:#a889d1;
+  --radius:4px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:14px;
+  line-height:1.5;
+  -webkit-font-smoothing:antialiased;
+}
+.app{
+  display:flex;
+  min-height:100vh;
+}
+/* ---------- SIDEBAR ---------- */
+.sidebar{
+  width:230px;
+  flex-shrink:0;
+  background:var(--panel);
+  border-right:1px solid var(--line);
+  padding:20px 14px;
+  display:flex;
+  flex-direction:column;
+  gap:2px;
+}
+.brand{
+  font-size:15px;
+  font-weight:700;
+  letter-spacing:0.2px;
+  color:var(--text);
+  margin:2px 4px 4px 4px;
+}
+.brand-sub{
+  font-size:11.5px;
+  color:var(--text-faint);
+  margin:0 4px 18px 4px;
+}
+.nav-group-label{
+  font-size:11px;
+  color:var(--text-faint);
+  margin:16px 8px 6px 8px;
+}
+.nav-item{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  padding:7px 10px;
+  border-radius:var(--radius);
+  cursor:pointer;
+  color:var(--text-dim);
+  border:1px solid transparent;
+  transition:background .12s ease, color .12s ease;
+}
+.nav-item:hover{
+  background:var(--panel-2);
+  color:var(--text);
+}
+.nav-item.active{
+  background:var(--panel-2);
+  color:var(--text);
+  border-color:var(--line);
+}
+.nav-item .dot{
+  width:7px;height:7px;border-radius:50%;
+  flex-shrink:0;
+  background:var(--text-faint);
+}
+.nav-item-label{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  overflow:hidden;
+  white-space:nowrap;
+  text-overflow:ellipsis;
+}
+.nav-item .count{
+  font-size:11.5px;
+  color:var(--text-faint);
+  flex-shrink:0;
+}
+.nav-item.active .count{color:var(--text-dim);}
+
+/* ---------- MAIN ---------- */
+.main{
+  flex:1;
+  min-width:0;
+  display:flex;
+  flex-direction:column;
+}
+.topbar{
+  padding:22px 28px 16px 28px;
+  border-bottom:1px solid var(--line);
+  display:flex;
+  flex-direction:column;
+  gap:14px;
+}
+.topbar-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:16px;
+  flex-wrap:wrap;
+}
+.view-title{
+  font-size:19px;
+  font-weight:700;
+  margin:0;
+}
+.view-sub{
+  font-size:12.5px;
+  color:var(--text-faint);
+  margin-top:2px;
+}
+.stats{
+  display:flex;
+  gap:18px;
+}
+.stat{
+  text-align:right;
+}
+.stat-num{
+  font-size:18px;
+  font-weight:700;
+}
+.stat-label{
+  font-size:11px;
+  color:var(--text-faint);
+}
+.controls-row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+.search-box{
+  flex:1;
+  min-width:180px;
+  background:var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:8px 12px;
+  color:var(--text);
+  font-size:13.5px;
+  outline:none;
+}
+.search-box::placeholder{color:var(--text-faint);}
+.search-box:focus{border-color:var(--amber-dim);}
+.filter-pill{
+  background:var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:8px 10px;
+  color:var(--text-dim);
+  font-size:13px;
+  cursor:pointer;
+}
+.filter-pill.active{
+  border-color:var(--amber-dim);
+  color:var(--amber);
+}
+select.filter-pill{
+  -webkit-appearance:none;
+  appearance:none;
+}
+
+/* ---------- TABLE ---------- */
+.table-wrap{
+  flex:1;
+  overflow:auto;
+  padding:0 28px 28px 28px;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:14px;
+}
+thead th{
+  position:sticky;
+  top:0;
+  background:var(--bg);
+  text-align:left;
+  font-size:11px;
+  font-weight:600;
+  color:var(--text-faint);
+  padding:8px 10px;
+  border-bottom:1px solid var(--line);
+  white-space:nowrap;
+}
+tbody td{
+  padding:9px 10px;
+  border-bottom:1px solid var(--line);
+  vertical-align:middle;
+}
+tbody tr:hover{background:var(--panel);}
+.car-name{font-weight:600;color:var(--text);}
+.car-notes{
+  color:var(--text-faint);
+  font-size:12px;
+  max-width:260px;
+}
+.cat-chip{
+  display:inline-block;
+  font-size:11.5px;
+  color:var(--text-dim);
+  background:var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  padding:3px 8px;
+  white-space:nowrap;
+}
+.rating{
+  color:var(--amber);
+  font-variant-numeric:tabular-nums;
+  font-weight:600;
+}
+.status-btn{
+  font-size:12px;
+  font-weight:600;
+  border-radius:var(--radius);
+  padding:5px 10px;
+  cursor:pointer;
+  border:1px solid transparent;
+  white-space:nowrap;
+}
+.status-btn.planned{
+  background:var(--planned-bg);
+  color:var(--amber);
+  border-color:var(--amber-dim);
+}
+.status-btn.owned{
+  background:var(--owned-bg);
+  color:var(--owned);
+  border-color:var(--owned);
+}
+.assign-select{
+  background:var(--panel-2);
+  border:1px solid var(--line);
+  border-radius:var(--radius);
+  color:var(--text-dim);
+  font-size:12.5px;
+  padding:5px 6px;
+  outline:none;
+  min-width:104px;
+}
+.assign-select.sindgrid{color:var(--sindgrid);border-color:var(--sindgrid);}
+.assign-select.ingrid{color:var(--ingrid);border-color:var(--ingrid);}
+.assign-select.astrid{color:var(--astrid);border-color:var(--astrid);}
+.empty-state{
+  padding:60px 20px;
+  text-align:center;
+  color:var(--text-faint);
+}
+.reset-link{
+  font-size:11.5px;
+  color:var(--text-faint);
+  cursor:pointer;
+  text-decoration:underline;
+  margin-top:auto;
+  padding:8px;
+}
+.reset-link:hover{color:var(--text-dim);}
+.wiki-link{
+  font-size:12px;
+  color:var(--text-faint);
+  text-decoration:none;
+  border-bottom:1px dotted var(--text-faint);
+  white-space:nowrap;
+}
+.wiki-link:hover{color:var(--amber);border-color:var(--amber);}
+
+/* ---------- GUIDE VIEW ---------- */
+.guide-view{
+  padding:24px 28px 40px 28px;
+  max-width:820px;
+  overflow-y:auto;
+}
+.guide-intro{
+  color:var(--text-dim);
+  font-size:13.5px;
+  margin-bottom:24px;
+  max-width:640px;
+}
+.guide-section{
+  margin-bottom:26px;
+  padding-bottom:22px;
+  border-bottom:1px solid var(--line);
+}
+.guide-section:last-child{border-bottom:none;}
+.guide-section h3{
+  font-size:15px;
+  margin:0 0 4px 0;
+  color:var(--amber);
+}
+.guide-section .guide-tag{
+  display:inline-block;
+  font-size:11px;
+  font-weight:600;
+  color:var(--owned);
+  background:var(--owned-bg);
+  border:1px solid var(--owned);
+  border-radius:var(--radius);
+  padding:2px 8px;
+  margin-bottom:10px;
+}
+.guide-section p{
+  font-size:13.5px;
+  color:var(--text);
+  line-height:1.6;
+  margin:6px 0;
+}
+.guide-table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:10px;
+  font-size:13px;
+}
+.guide-table th{
+  text-align:left;
+  font-size:11px;
+  color:var(--text-faint);
+  padding:6px 8px;
+  border-bottom:1px solid var(--line);
+}
+.guide-table td{
+  padding:7px 8px;
+  border-bottom:1px solid var(--line);
+  color:var(--text-dim);
+  vertical-align:top;
+}
+.guide-table td:first-child{color:var(--text);font-weight:600;white-space:nowrap;}
+.guide-list{
+  margin:8px 0 0 0;
+  padding-left:18px;
+  color:var(--text-dim);
+  font-size:13.5px;
+  line-height:1.7;
+}
+.guide-list li strong{color:var(--text);}
+.save-indicator{
+  font-size:11px;
+  color:var(--text-faint);
+  opacity:0;
+  transition:opacity .3s ease;
+}
+.save-indicator.show{opacity:1;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--line);border-radius:6px;}
+
+.car-name-btn{
+  background:none;border:none;padding:0;margin:0;
+  font:inherit;font-weight:600;color:var(--text);
+  cursor:pointer;text-align:left;
+}
+.car-name-btn:hover{color:var(--amber);text-decoration:underline;}
+
+/* ---------- MODAL ---------- */
+.modal-overlay{
+  position:fixed;inset:0;
+  background:rgba(10,11,13,0.72);
+  display:none;
+  align-items:center;justify-content:center;
+  padding:20px;
+  z-index:100;
+}
+.modal-overlay.open{display:flex;}
+.modal{
+  background:var(--panel);
+  border:1px solid var(--line);
+  border-radius:6px;
+  width:100%;
+  max-width:620px;
+  max-height:88vh;
+  overflow-y:auto;
+  padding:24px 26px;
+}
+.modal-head{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:4px;
+}
+.modal-title{
+  font-size:19px;
+  font-weight:700;
+  margin:0;
+}
+.modal-close{
+  background:none;border:none;color:var(--text-faint);
+  font-size:20px;cursor:pointer;line-height:1;padding:2px 4px;
+}
+.modal-close:hover{color:var(--text);}
+.modal-cat{
+  font-size:12.5px;color:var(--text-faint);margin-bottom:18px;
+}
+.modal-photo-link{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  background:var(--panel-2);
+  border:1px dashed var(--line);
+  border-radius:var(--radius);
+  padding:34px 16px;
+  color:var(--text-dim);
+  text-decoration:none;
+  font-size:13px;
+  margin-bottom:18px;
+  text-align:center;
+}
+.modal-photo-link:hover{border-color:var(--amber-dim);color:var(--amber);}
+.modal-photo-link .photo-icon{
+  width:34px;height:34px;
+  opacity:.55;
+}
+.modal-photo-link .photo-cta{
+  font-weight:600;
+  color:var(--amber);
+}
+.modal-photo-img{
+  width:100%;
+  border-radius:var(--radius);
+  border:1px solid var(--line);
+  margin-bottom:18px;
+  display:block;
+}
+.modal-section{
+  margin-bottom:16px;
+}
+.modal-section-label{
+  font-size:11px;
+  color:var(--text-faint);
+  margin-bottom:5px;
+}
+.modal-section-body{
+  font-size:13.5px;
+  color:var(--text);
+}
+.modal-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+  margin-bottom:16px;
+}
+.livery-yes{color:var(--owned);font-weight:600;}
+.livery-no{color:var(--text-dim);}
+.modal-footnote{
+  font-size:11px;
+  color:var(--text-faint);
+  margin-top:18px;
+  padding-top:14px;
+  border-top:1px solid var(--line);
+}
+
+@media (max-width:760px){
+  .app{flex-direction:column;}
+  .sidebar{width:100%;flex-direction:row;overflow-x:auto;padding:12px;gap:8px;}
+  .brand,.brand-sub,.nav-group-label,.reset-link{display:none;}
+  .nav-item{flex-shrink:0;}
+  .topbar{padding:16px;}
+  .table-wrap{padding:0 12px 20px 12px;}
+  .car-notes{display:none;}
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <div class="sidebar">
+    <div>
+      <div class="brand">Katalog Aut</div>
+      <div class="brand-sub">Plan budowy driftowego garażu</div>
+    </div>
+
+    <div id="nav-all"></div>
+
+    <div class="nav-group-label">Kategorie</div>
+    <div id="nav-categories"></div>
+
+    <div class="nav-group-label">Przypisania</div>
+    <div id="nav-owners"></div>
+
+    <div class="nav-group-label">Podkategorie</div>
+    <div id="nav-special"></div>
+
+    <div class="nav-group-label">Wiedza</div>
+    <div class="nav-item" id="nav-guide">
+      <span class="nav-item-label"><span class="dot" style="background:var(--amber)"></span>Poradnik driftu</span>
+    </div>
+
+    <div class="reset-link" id="reset-link">Wyczyść wszystkie przypisania i statusy</div>
+  </div>
+
+  <div class="main">
+    <div class="topbar" id="topbar">
+      <div class="topbar-row">
+        <div>
+          <h1 class="view-title" id="view-title">Wszystkie pojazdy</h1>
+          <div class="view-sub" id="view-sub"></div>
+        </div>
+        <div class="stats" id="stats-row">
+          <div class="stat">
+            <div class="stat-num" id="stat-total">0</div>
+            <div class="stat-label">widocznych</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num" id="stat-owned">0</div>
+            <div class="stat-label">posiadanych</div>
+          </div>
+          <div class="stat">
+            <div class="stat-num" id="stat-assigned">0</div>
+            <div class="stat-label">przypisanych</div>
+          </div>
+        </div>
+      </div>
+      <div class="controls-row" id="controls-row">
+        <input type="text" class="search-box" id="search" placeholder="Szukaj po nazwie lub opisie...">
+        <select class="filter-pill" id="status-filter">
+          <option value="all">Wszystkie statusy</option>
+          <option value="Planowany">Planowany</option>
+          <option value="Owned">Owned</option>
+        </select>
+        <select class="filter-pill" id="sort-select">
+          <option value="default">Sortuj: domyślnie</option>
+          <option value="name">Nazwa (A-Z)</option>
+          <option value="brand">Marka (A-Z)</option>
+          <option value="rating-desc">Ocena: najwyższa → najniższa</option>
+        </select>
+        <span class="save-indicator" id="save-indicator">Zapisano</span>
+      </div>
+    </div>
+
+    <div class="table-wrap" id="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Pojazd</th>
+            <th>Kategoria</th>
+            <th>Ocena</th>
+            <th>Status</th>
+            <th>Przypisz do</th>
+          </tr>
+        </thead>
+        <tbody id="table-body"></tbody>
+      </table>
+      <div class="empty-state" id="empty-state" style="display:none;">Brak pojazdów spełniających kryteria.</div>
+    </div>
+
+    <div class="guide-view" id="guide-view" style="display:none;"></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal-overlay">
+  <div class="modal" id="modal-content"></div>
+</div>
+
+<script>
+const CARS = [{"id": 1, "name": "Karin Futo", "category": "JDM / Import", "rating": 5.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Karin"}, {"id": 2, "name": "Karin Futo GTX", "category": "JDM / Import", "rating": 5.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Karin"}, {"id": 3, "name": "Annis Remus", "category": "JDM / Import", "rating": 5.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Annis"}, {"id": 4, "name": "Annis ZR350", "category": "JDM / Import", "rating": 5.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Annis"}, {"id": 5, "name": "Annis Euros", "category": "JDM / Import", "rating": 5.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Annis"}, {"id": 6, "name": "Dinka Jester Classic", "category": "JDM / Import", "rating": 5.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Dinka"}, {"id": 7, "name": "Dinka Jester RR", "category": "JDM / Import", "rating": 5.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Dinka"}, {"id": 8, "name": "Dinka RT3000", "category": "JDM / Import", "rating": 5.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Dinka"}, {"id": 9, "name": "Übermacht Cypher", "category": "JDM / Import", "rating": 5.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Übermacht"}, {"id": 10, "name": "Übermacht Sentinel Classic", "category": "JDM / Import", "rating": 5.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Übermacht"}, {"id": 11, "name": "Übermacht Sentinel Classic Widebody", "category": "JDM / Import", "rating": 5.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Übermacht"}, {"id": 12, "name": "Übermacht Sentinel XS", "category": "JDM / Import", "rating": 5.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Übermacht"}, {"id": 13, "name": "Fathom FR36", "category": "JDM / Import", "rating": 5.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Fathom"}, {"id": 14, "name": "Vulcar Nebula Turbo", "category": "JDM / Import", "rating": 5.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Vulcar"}, {"id": 15, "name": "Karin Sultan", "category": "JDM / Import", "rating": 4.5, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Karin"}, {"id": 16, "name": "Karin Sultan RS", "category": "JDM / Import", "rating": 4.5, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Karin"}, {"id": 17, "name": "Karin Sultan Classic", "category": "JDM / Import", "rating": 4.5, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Karin"}, {"id": 18, "name": "Karin Sultan RS Classic", "category": "JDM / Import", "rating": 4.5, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Karin"}, {"id": 19, "name": "Karin 190z", "category": "JDM / Import", "rating": 4.5, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Karin"}, {"id": 20, "name": "Karin Previon", "category": "JDM / Import", "rating": 4.5, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Karin"}, {"id": 21, "name": "Karin Calico GTF", "category": "JDM / Import", "rating": 4.5, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Karin"}, {"id": 22, "name": "Karin Kuruma", "category": "JDM / Import", "rating": 4.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Karin"}, {"id": 23, "name": "Karin Everon", "category": "JDM / Import", "rating": 4.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Karin"}, {"id": 24, "name": "Maibatsu Penumbra", "category": "JDM / Import", "rating": 4.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Maibatsu"}, {"id": 25, "name": "Maibatsu Penumbra FF", "category": "JDM / Import", "rating": 4.5, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Maibatsu"}, {"id": 26, "name": "Dinka Blista Kanjo", "category": "JDM / Import", "rating": 4.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Dinka"}, {"id": 27, "name": "Dinka Sugoi", "category": "JDM / Import", "rating": 4.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Dinka"}, {"id": 28, "name": "Dinka Kanjo SJ", "category": "JDM / Import", "rating": 4.5, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Dinka"}, {"id": 29, "name": "Dinka Chavos V6", "category": "JDM / Import", "rating": 5.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Dinka"}, {"id": 30, "name": "Emperor Vectre", "category": "JDM / Import", "rating": 4.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Emperor"}, {"id": 31, "name": "Emperor ETR1", "category": "JDM / Import", "rating": 3.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Emperor"}, {"id": 32, "name": "Annis Elegy RH8", "category": "JDM / Import", "rating": 4.5, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Annis"}, {"id": 33, "name": "Annis Elegy Retro Custom", "category": "JDM / Import", "rating": 5.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Annis"}, {"id": 34, "name": "Annis Elegy", "category": "JDM / Import", "rating": 4.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Annis"}, {"id": 35, "name": "Annis Savestra", "category": "JDM / Import", "rating": 4.5, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Annis"}, {"id": 36, "name": "Annis Hellion", "category": "JDM / Import", "rating": 3.5, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Annis"}, {"id": 37, "name": "Annis Hardy", "category": "JDM / Import", "rating": 4.5, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Annis"}, {"id": 38, "name": "RUNE Cheburek", "category": "JDM / Import", "rating": 4.5, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "RUNE"}, {"id": 39, "name": "Shitzu Keitora", "category": "JDM / Import", "rating": 4.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Shitzu"}, {"id": 40, "name": "Karin Hotring Everon", "category": "JDM / Import", "rating": 4.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Karin"}, {"id": 41, "name": "Karin S95", "category": "JDM / Import", "rating": 4.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Karin"}, {"id": 42, "name": "Karin Asterope GZ", "category": "JDM / Import", "rating": 3.5, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Karin"}, {"id": 43, "name": "Karin Boor", "category": "JDM / Import", "rating": 4.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Karin"}, {"id": 44, "name": "Karin Vivanite", "category": "JDM / Import", "rating": 3.0, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Karin"}, {"id": 45, "name": "Karin Woodlander", "category": "JDM / Import", "rating": 3.5, "status": "Planowany", "notes": "Naturalny kandydat do driftu", "brand": "Karin"}, {"id": 46, "name": "Übermacht Sentinel XS", "category": "BMW / Niemieckie", "rating": 5.0, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Übermacht"}, {"id": 47, "name": "Übermacht Sentinel Classic", "category": "BMW / Niemieckie", "rating": 5.0, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Übermacht"}, {"id": 48, "name": "Übermacht Sentinel Classic Widebody", "category": "BMW / Niemieckie", "rating": 5.0, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Übermacht"}, {"id": 49, "name": "Übermacht Cypher", "category": "BMW / Niemieckie", "rating": 5.0, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Übermacht"}, {"id": 50, "name": "Übermacht Zion", "category": "BMW / Niemieckie", "rating": 4.5, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Übermacht"}, {"id": 51, "name": "Übermacht Zion Classic", "category": "BMW / Niemieckie", "rating": 4.5, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Übermacht"}, {"id": 52, "name": "Übermacht Oracle", "category": "BMW / Niemieckie", "rating": 4.0, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Übermacht"}, {"id": 53, "name": "Übermacht Oracle XS", "category": "BMW / Niemieckie", "rating": 4.5, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Übermacht"}, {"id": 54, "name": "Übermacht Rhinehart", "category": "BMW / Niemieckie", "rating": 4.0, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Übermacht"}, {"id": 55, "name": "Übermacht Rebla GTS", "category": "BMW / Niemieckie", "rating": 3.0, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Übermacht"}, {"id": 56, "name": "Übermacht Revolter", "category": "BMW / Niemieckie", "rating": 4.0, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Übermacht"}, {"id": 57, "name": "Übermacht Niobe", "category": "BMW / Niemieckie", "rating": 4.5, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Übermacht"}, {"id": 58, "name": "Übermacht SC1", "category": "BMW / Niemieckie", "rating": 3.5, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Übermacht"}, {"id": 59, "name": "Übermacht V-STR", "category": "BMW / Niemieckie", "rating": 4.0, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Übermacht"}, {"id": 60, "name": "Übermacht Schafter", "category": "BMW / Niemieckie", "rating": 4.0, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Übermacht"}, {"id": 61, "name": "Übermacht Schafter V12", "category": "BMW / Niemieckie", "rating": 4.5, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Übermacht"}, {"id": 62, "name": "Übermacht Schafter LWB", "category": "BMW / Niemieckie", "rating": 3.0, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Übermacht"}, {"id": 63, "name": "Benefactor Schwartzer", "category": "BMW / Niemieckie", "rating": 5.0, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Benefactor"}, {"id": 64, "name": "Benefactor Schlagen GT", "category": "BMW / Niemieckie", "rating": 4.5, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Benefactor"}, {"id": 65, "name": "Benefactor Surano", "category": "BMW / Niemieckie", "rating": 4.5, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Benefactor"}, {"id": 66, "name": "Benefactor Feltzer", "category": "BMW / Niemieckie", "rating": 4.5, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Benefactor"}, {"id": 67, "name": "Benefactor Vorschlaghammer", "category": "BMW / Niemieckie", "rating": 5.0, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Benefactor"}, {"id": 68, "name": "Benefactor Streiter", "category": "BMW / Niemieckie", "rating": 4.0, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Benefactor"}, {"id": 69, "name": "Benefactor SM722", "category": "BMW / Niemieckie", "rating": 3.5, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Benefactor"}, {"id": 70, "name": "Benefactor Dubsta", "category": "BMW / Niemieckie", "rating": 3.0, "status": "Planowany", "notes": "Dobry do street/tandem driftu", "brand": "Benefactor"}, {"id": 71, "name": "Vapid Dominator", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Vapid"}, {"id": 72, "name": "Vapid Dominator GT", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Vapid"}, {"id": 73, "name": "Vapid Dominator GTT", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Vapid"}, {"id": 74, "name": "Vapid Dominator FX", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Vapid"}, {"id": 75, "name": "Bravado Gauntlet", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Bravado"}, {"id": 76, "name": "Bravado Gauntlet Hellfire", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Bravado"}, {"id": 77, "name": "Declasse Vigero", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Declasse"}, {"id": 78, "name": "Declasse Vigero ZX", "category": "Muscle", "rating": 4.5, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Declasse"}, {"id": 79, "name": "Declasse Drift Tampa", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Declasse"}, {"id": 80, "name": "Declasse Tampa", "category": "Muscle", "rating": 4.5, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Declasse"}, {"id": 81, "name": "Declasse Drift Yosemite", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Declasse"}, {"id": 82, "name": "Declasse Yosemite", "category": "Muscle", "rating": 4.5, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Declasse"}, {"id": 83, "name": "Declasse Impaler", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Declasse"}, {"id": 84, "name": "Declasse Impaler SZ", "category": "Muscle", "rating": 4.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Declasse"}, {"id": 85, "name": "Declasse Sabre Turbo", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Declasse"}, {"id": 86, "name": "Declasse Sabre Turbo Custom", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Declasse"}, {"id": 87, "name": "Bravado Gauntlet Classic", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Bravado"}, {"id": 88, "name": "Bravado Gauntlet Classic Custom", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Bravado"}, {"id": 89, "name": "Bravado Buffalo", "category": "Muscle", "rating": 4.5, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Bravado"}, {"id": 90, "name": "Bravado Buffalo S", "category": "Muscle", "rating": 4.5, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Bravado"}, {"id": 91, "name": "Bravado Buffalo STX", "category": "Muscle", "rating": 4.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Bravado"}, {"id": 92, "name": "Imponte Ruiner", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Imponte"}, {"id": 93, "name": "Imponte Phoenix", "category": "Muscle", "rating": 4.5, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Imponte"}, {"id": 94, "name": "Imponte Dukes", "category": "Muscle", "rating": 4.5, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Imponte"}, {"id": 95, "name": "Imponte Beater Dukes", "category": "Muscle", "rating": 4.5, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Imponte"}, {"id": 96, "name": "Imponte Nightshade", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Imponte"}, {"id": 97, "name": "Willard Faction", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Willard"}, {"id": 98, "name": "Willard Faction Custom", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Willard"}, {"id": 99, "name": "Willard Faction Custom Donk", "category": "Muscle", "rating": 3.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Willard"}, {"id": 100, "name": "Vapid Blade", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Vapid"}, {"id": 101, "name": "Vapid Chino", "category": "Muscle", "rating": 4.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Vapid"}, {"id": 102, "name": "Vapid Chino Custom", "category": "Muscle", "rating": 4.5, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Vapid"}, {"id": 103, "name": "Vapid Slamvan", "category": "Muscle", "rating": 4.5, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Vapid"}, {"id": 104, "name": "Vapid Slamvan Custom", "category": "Muscle", "rating": 4.5, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Vapid"}, {"id": 105, "name": "Vapid Hustler", "category": "Muscle", "rating": 4.5, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Vapid"}, {"id": 106, "name": "Vapid Clique", "category": "Muscle", "rating": 4.5, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Vapid"}, {"id": 107, "name": "Vapid Ellie", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Vapid"}, {"id": 108, "name": "Albany Buccaneer", "category": "Muscle", "rating": 4.5, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Albany"}, {"id": 109, "name": "Albany Buccaneer Custom", "category": "Muscle", "rating": 4.5, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Albany"}, {"id": 110, "name": "Albany Virgo", "category": "Muscle", "rating": 4.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Albany"}, {"id": 111, "name": "Albany Hermes", "category": "Muscle", "rating": 4.5, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Albany"}, {"id": 112, "name": "Declasse Mamba", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Declasse"}, {"id": 113, "name": "Coquette BlackFin", "category": "Muscle", "rating": 5.0, "status": "Planowany", "notes": "Du?o momentu; dobry materia? pod drift", "brand": "Coquette"}, {"id": 114, "name": "Dewbauchee Rapid GT", "category": "Europejskie", "rating": 5.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Dewbauchee"}, {"id": 115, "name": "Dewbauchee Rapid GT Classic", "category": "Europejskie", "rating": 4.5, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Dewbauchee"}, {"id": 116, "name": "Dewbauchee Massacro", "category": "Europejskie", "rating": 4.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Dewbauchee"}, {"id": 117, "name": "Dewbauchee Specter", "category": "Europejskie", "rating": 4.5, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Dewbauchee"}, {"id": 118, "name": "Dewbauchee Specter Custom", "category": "Europejskie", "rating": 4.5, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Dewbauchee"}, {"id": 119, "name": "Dewbauchee Exemplar", "category": "Europejskie", "rating": 4.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Dewbauchee"}, {"id": 120, "name": "Ocelot Jackal", "category": "Europejskie", "rating": 4.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Ocelot"}, {"id": 121, "name": "Ocelot F620", "category": "Europejskie", "rating": 4.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Ocelot"}, {"id": 122, "name": "Ocelot Felon", "category": "Europejskie", "rating": 4.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Ocelot"}, {"id": 123, "name": "Ocelot Felon GT", "category": "Europejskie", "rating": 4.5, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Ocelot"}, {"id": 124, "name": "Lampadati Felon", "category": "Europejskie", "rating": 4.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Lampadati"}, {"id": 125, "name": "Lampadati Komoda", "category": "Europejskie", "rating": 4.5, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Lampadati"}, {"id": 126, "name": "Lampadati Pigalle", "category": "Europejskie", "rating": 4.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Lampadati"}, {"id": 127, "name": "Lampadati Tigon", "category": "Europejskie", "rating": 3.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Lampadati"}, {"id": 128, "name": "Obey 9F", "category": "Europejskie", "rating": 4.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Obey"}, {"id": 129, "name": "Obey 9F Cabrio", "category": "Europejskie", "rating": 3.5, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Obey"}, {"id": 130, "name": "Obey 8F Drafter", "category": "Europejskie", "rating": 4.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Obey"}, {"id": 131, "name": "Obey Tailgater", "category": "Europejskie", "rating": 3.5, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Obey"}, {"id": 132, "name": "Obey Tailgater S", "category": "Europejskie", "rating": 3.5, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Obey"}, {"id": 133, "name": "Pfister Comet", "category": "Europejskie", "rating": 4.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Pfister"}, {"id": 134, "name": "Pfister Comet Retro Custom", "category": "Europejskie", "rating": 5.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Pfister"}, {"id": 135, "name": "Pfister Comet S2", "category": "Europejskie", "rating": 4.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Pfister"}, {"id": 136, "name": "Pfister Growler", "category": "Europejskie", "rating": 4.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Pfister"}, {"id": 137, "name": "Pfister Neon", "category": "Europejskie", "rating": 3.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Pfister"}, {"id": 138, "name": "Grotti Carbonizzare", "category": "Europejskie", "rating": 4.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Grotti"}, {"id": 139, "name": "Grotti Bestia GTS", "category": "Europejskie", "rating": 4.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Grotti"}, {"id": 140, "name": "Grotti Stinger", "category": "Europejskie", "rating": 4.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Grotti"}, {"id": 141, "name": "Grotti Stinger GT", "category": "Europejskie", "rating": 4.5, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Grotti"}, {"id": 142, "name": "Grotti Itali GTO", "category": "Europejskie", "rating": 3.5, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Grotti"}, {"id": 143, "name": "Grotti Furia", "category": "Europejskie", "rating": 3.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Grotti"}, {"id": 144, "name": "Progen T20", "category": "Europejskie", "rating": 3.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Progen"}, {"id": 145, "name": "Truffade Z-Type", "category": "Europejskie", "rating": 4.0, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Truffade"}, {"id": 146, "name": "Truffade Adder", "category": "Europejskie", "rating": 2.5, "status": "Planowany", "notes": "Zale?ne od nap?du i handlingu", "brand": "Truffade"}, {"id": 147, "name": "Karin 190z", "category": "Klasyczne / Retro", "rating": 4.5, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Karin"}, {"id": 148, "name": "Vulcar Nebula Turbo", "category": "Klasyczne / Retro", "rating": 5.0, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Vulcar"}, {"id": 149, "name": "RUNE Cheburek", "category": "Klasyczne / Retro", "rating": 4.5, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "RUNE"}, {"id": 150, "name": "Declasse Mamba", "category": "Klasyczne / Retro", "rating": 5.0, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Declasse"}, {"id": 151, "name": "Declasse Tornado", "category": "Klasyczne / Retro", "rating": 4.5, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Declasse"}, {"id": 152, "name": "Declasse Tornado Custom", "category": "Klasyczne / Retro", "rating": 4.5, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Declasse"}, {"id": 153, "name": "Declasse Tornado Rat Rod", "category": "Klasyczne / Retro", "rating": 4.0, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Declasse"}, {"id": 154, "name": "Declasse Tornado Mariachi", "category": "Klasyczne / Retro", "rating": 4.0, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Declasse"}, {"id": 155, "name": "Vapid Blade", "category": "Klasyczne / Retro", "rating": 5.0, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Vapid"}, {"id": 156, "name": "Vapid Hustler", "category": "Klasyczne / Retro", "rating": 4.5, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Vapid"}, {"id": 157, "name": "Vapid Peyote", "category": "Klasyczne / Retro", "rating": 4.5, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Vapid"}, {"id": 158, "name": "Vapid Peyote Custom", "category": "Klasyczne / Retro", "rating": 4.5, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Vapid"}, {"id": 159, "name": "Vapid Retinue", "category": "Klasyczne / Retro", "rating": 4.5, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Vapid"}, {"id": 160, "name": "Vapid Retinue Mk II", "category": "Klasyczne / Retro", "rating": 4.5, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Vapid"}, {"id": 161, "name": "Lampadati Pigalle", "category": "Klasyczne / Retro", "rating": 4.0, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Lampadati"}, {"id": 162, "name": "Lampadati Casco", "category": "Klasyczne / Retro", "rating": 4.0, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Lampadati"}, {"id": 163, "name": "Grotti Stinger", "category": "Klasyczne / Retro", "rating": 4.0, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Grotti"}, {"id": 164, "name": "Grotti Stinger GT", "category": "Klasyczne / Retro", "rating": 4.5, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Grotti"}, {"id": 165, "name": "Benefactor Stirling GT", "category": "Klasyczne / Retro", "rating": 4.0, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Benefactor"}, {"id": 166, "name": "Benefactor Glendale", "category": "Klasyczne / Retro", "rating": 4.5, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Benefactor"}, {"id": 167, "name": "Benefactor Glendale Custom", "category": "Klasyczne / Retro", "rating": 4.5, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Benefactor"}, {"id": 168, "name": "Albany Hermes", "category": "Klasyczne / Retro", "rating": 4.5, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Albany"}, {"id": 169, "name": "Albany Manana", "category": "Klasyczne / Retro", "rating": 4.0, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Albany"}, {"id": 170, "name": "Albany Manana Custom", "category": "Klasyczne / Retro", "rating": 4.5, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Albany"}, {"id": 171, "name": "Bravado Gauntlet Classic", "category": "Klasyczne / Retro", "rating": 5.0, "status": "Planowany", "notes": "?wietne do old-school buildów", "brand": "Bravado"}];
+const LOOKUP = {"Karin Futo": {"real": "Toyota Corolla AE86 / Sprinter Trueno", "country": "Japonia", "drivetrain": "RWD, R4 (dwuwałkowy, wolnossący/turbo w wersji GTX)", "livery": "Nie (tylko LS Customs)", "drift": "Klasyczny drift-starter: turbo, zawieszenie sportowe/wyścigowe, hamulce, opona driftowa. Lekki tył ułatwia inicjację poślizgu.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/karin-futo", "tags": ["drift"]}, "Karin Futo GTX": {"real": "Toyota Corolla AE86 (tuning widebody)", "country": "Japonia", "drivetrain": "RWD, R4 turbo", "livery": "Tak (własny widebody kit)", "drift": "Fabrycznie już 'driftowy' — dograj tylko oponę driftową i ustawienia zawieszenia pod styl jazdy.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/futo-gtx", "tags": ["drift"]}, "Annis Remus": {"real": "Nissan Skyline GT-R R33", "country": "Japonia", "drivetrain": "AWD, R6 turbo (w grze zachowuje się jak RWD-biased)", "livery": "Nie", "drift": "Mocny silnik, rozważ serwerowy mod zmiany napędu na RWD dla driftu; w standardzie trenuj kontrolowany poślizg na hamulcu ręcznym.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/remus", "tags": ["street"]}, "Annis ZR350": {"real": "Nissan 350Z / Fairlady Z", "country": "Japonia", "drivetrain": "RWD, V6", "livery": "Nie", "drift": "Bardzo dobra baza driftowa — turbo, LSD (sportowa przekładnia), opona driftowa, obniżone zawieszenie.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/zr350", "tags": ["drift"]}, "Annis Euros": {"real": "Nissan Silvia S15", "country": "Japonia", "drivetrain": "RWD, R4 turbo", "livery": "Tak (Benny's Original Motor Works)", "drift": "Jeden z najlepszych driftowych wyborów w grze — pełny pakiet Benny's (widebody, drift tune) plus turbo i opona driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/euros", "tags": ["drift"]}, "Dinka Jester Classic": {"real": "Toyota Supra Mk4 (JZA80)", "country": "Japonia", "drivetrain": "RWD, R6 turbo", "livery": "Nie", "drift": "Klasyk drift — dograj turbo, sportowe zawieszenie i oponę driftową.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/dinka-jester-classic", "tags": ["drift"]}, "Dinka Jester RR": {"real": "Toyota Supra Mk5 / GR Supra", "country": "Japonia", "drivetrain": "RWD, R6 turbo", "livery": "Nie", "drift": "Nowoczesna baza z dużą mocą — kontroluj poślizg oponą driftową i twardszym zawieszeniem tylnym.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/jester-rr", "tags": ["drift"]}, "Dinka RT3000": {"real": "Toyota MR2 / Celica GT4", "country": "Japonia", "drivetrain": "AWD/RWD (rajdowy layout)", "livery": "Nie", "drift": "Świetny do driftu rajdowego (gravel-style) — dograj zawieszenie terenowe/sportowe i oponę driftową.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/rt3000", "tags": ["offroad"]}, "Übermacht Cypher": {"real": "BMW M3 (E46)", "country": "Niemcy", "drivetrain": "RWD, R6", "livery": "Nie", "drift": "Bardzo zbalansowany RWD — idealny pierwszy samochód pod naukę driftu ulicznego.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/cypher", "tags": ["drift"]}, "Übermacht Sentinel Classic": {"real": "BMW M3 (E30)", "country": "Niemcy", "drivetrain": "RWD, R4/R6", "livery": "Nie", "drift": "Lekki i responsywny — turbo, LSD, opona driftowa wystarczą do dobrego drifta.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/ubermacht-sentinel-classic", "tags": ["drift"]}, "Übermacht Sentinel Classic Widebody": {"real": "BMW M3 (E30) widebody/tandem drift build", "country": "Niemcy", "drivetrain": "RWD, R4/R6", "livery": "Tak (własny widebody)", "drift": "Gotowy pod tandem drift — dopracuj kąt skrętu i zawieszenie na torze.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/sentinel-classic-widebody", "tags": ["drift"]}, "Übermacht Sentinel XS": {"real": "BMW M3 (E92)", "country": "Niemcy", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Mocny silnik V8 w lekkim nadwoziu — świetna baza pod street/tandem drift.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/ubermacht-sentinel-xs", "tags": ["drift"]}, "Fathom FR36": {"real": "BMW M2", "country": "Niemcy", "drivetrain": "RWD, R6 turbo", "livery": "Nie", "drift": "Kompaktowy i zwrotny — dograj turbo, LSD i oponę driftową.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/fr36", "tags": ["drift"]}, "Vulcar Nebula Turbo": {"real": "Volvo 242 Turbo", "country": "Szwecja", "drivetrain": "RWD, R4 turbo", "livery": "Nie", "drift": "Old-school RWD turbo — prosta i skuteczna baza driftowa, dograj LSD.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/nebula-turbo", "tags": ["drift"]}, "Karin Sultan": {"real": "Subaru Impreza WRX STI", "country": "Japonia", "drivetrain": "AWD, R4 turbo (boxer)", "livery": "Nie", "drift": "AWD utrudnia klasyczny drift — rozważ mod zmiany napędu na RWD lub jazdę w stylu rajdowym z ręcznym.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/karin-sultan", "tags": ["street"]}, "Karin Sultan RS": {"real": "Subaru Impreza WRX STI (wyścigowa wersja)", "country": "Japonia", "drivetrain": "AWD, R4 turbo", "livery": "Tak (Benny's Original Motor Works)", "drift": "Ma pakiet Benny's z drift tune — po jego zamontowaniu zachowuje się jak RWD i jest jednym z lepszych driftowych aut w grze.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/karin-sultan-rs", "tags": ["street"]}, "Karin Sultan Classic": {"real": "Subaru Impreza GC8 (pierwsza generacja)", "country": "Japonia", "drivetrain": "AWD, R4 turbo", "livery": "Nie", "drift": "Podobnie jak Sultan — sprawdź serwerowy mod RWD dla lepszego driftu.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/sultan-classic", "tags": ["street"]}, "Karin Sultan RS Classic": {"real": "Subaru Impreza 22B STI", "country": "Japonia", "drivetrain": "AWD, R4 turbo", "livery": "Tak (Benny's)", "drift": "Kultowa stylistyka + pakiet Benny's drift — jedna z ikon driftowych serwerów RP.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/sultan-rs-classic", "tags": ["street"]}, "Karin 190z": {"real": "Datsun 240Z / Nissan Fairlady Z", "country": "Japonia", "drivetrain": "RWD, R6", "livery": "Nie", "drift": "Lekka klasyczna konstrukcja — idealna pod naturalny drift z minimalnym tuningiem.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/karin-190z", "tags": ["drift"]}, "Karin Previon": {"real": "Toyota Prius (sportowo zmodyfikowany)", "country": "Japonia", "drivetrain": "FWD (bazowo)", "livery": "Nie", "drift": "Napęd na przód utrudnia drift — konieczny mod zmiany napędu; bez niego auto nie nadaje się do driftu.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/previon", "tags": ["street"]}, "Karin Calico GTF": {"real": "Toyota GR86 / Subaru BRZ", "country": "Japonia", "drivetrain": "RWD, Bokser 4", "livery": "Nie", "drift": "Jedna z najlepszych naturalnych baz driftowych w grze — niska masa, idealny balans.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/calico-gtf", "tags": ["drift"]}, "Karin Kuruma": {"real": "Subaru Impreza WRX (uliczna, opancerzona wersja bez pancerza)", "country": "Japonia", "drivetrain": "AWD, R4 turbo", "livery": "Nie", "drift": "AWD — potrzebny mod na RWD albo jazda w stylu rajdowym zamiast klasycznego drifta.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/karin-kuruma", "tags": ["street"]}, "Karin Everon": {"real": "Subaru Forester / Outback", "country": "Japonia", "drivetrain": "AWD, crossover", "livery": "Nie", "drift": "SUV o wysokim środku ciężkości — trudny do drifta, lepszy do driftu terenowego/rajdowego.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/everon", "tags": ["offroad"]}, "Maibatsu Penumbra": {"real": "Toyota Camry / Lexus IS (sportowa sylwetka)", "country": "Japonia", "drivetrain": "RWD/AWD w zależności od wersji", "livery": "Nie", "drift": "Wersja RWD dobrze nadaje się do driftu ulicznego po dograniu turbo i LSD.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/maibatsu-penumbra", "tags": ["street"]}, "Maibatsu Penumbra FF": {"real": "Toyota Camry (napęd na przód)", "country": "Japonia", "drivetrain": "FWD", "livery": "Nie", "drift": "Napęd przedni — do drifta potrzebny mod zmiany napędu, w standardzie nie nadaje się.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/penumbra-ff", "tags": ["street"]}, "Dinka Blista Kanjo": {"real": "Honda Civic EG/EK (Kanjo racing style)", "country": "Japonia", "drivetrain": "FWD", "livery": "Tak (Benny's - Blista Compact)", "drift": "Styl Kanjo to zwykle FWD — na driftowym serwerze najlepiej sprawdzi się po modzie na RWD.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/blista-kanjo", "tags": ["street"]}, "Dinka Sugoi": {"real": "Honda Beat / kei sports car", "country": "Japonia", "drivetrain": "RWD, mały silnik", "livery": "Nie", "drift": "Bardzo lekki — nawet mały silnik wystarczy do zabawy driftem po dograniu opony driftowej.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/sugoi", "tags": ["drift"]}, "Dinka Kanjo SJ": {"real": "Honda Civic Kanjo (wyścigowa)", "country": "Japonia", "drivetrain": "FWD", "livery": "Nie", "drift": "Podobnie jak Blista Kanjo — wymaga mod na RWD do sensownego drifta.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/kanjo-sj", "tags": ["street"]}, "Dinka Chavos V6": {"real": "Honda Accord (tuning V6)", "country": "Japonia", "drivetrain": "FWD/RWD zależnie od configu", "livery": "Nie", "drift": "Sprawdź w LS Customs układ napędu — jeśli FWD, potrzebny mod na RWD.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/chavos-v6", "tags": ["street"]}, "Emperor Vectre": {"real": "Cadillac ATS Coupe", "country": "USA", "drivetrain": "RWD, V6", "livery": "Nie", "drift": "Solidna amerykańsko-europejska baza RWD — turbo, LSD, opona driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/vectre", "tags": ["drift"]}, "Emperor ETR1": {"real": "Cadillac CTS-V", "country": "USA", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Dużo mocy w cięższym nadwoziu — dobre zawieszenie i szeroka opona driftowa to podstawa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/emperor-etr1", "tags": ["drift"]}, "Annis Elegy RH8": {"real": "Nissan Skyline GT-R R34", "country": "Japonia", "drivetrain": "AWD (w grze zachowuje się częściowo jak RWD)", "livery": "Nie", "drift": "Legenda drift-scenki mimo AWD — w grze ma bardzo dobre prowadzenie na poślizgu, wystarczy turbo i LSD.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/annis-elegy-rh8", "tags": ["street"]}, "Annis Elegy Retro Custom": {"real": "Nissan Skyline GT-R R34 (widebody)", "country": "Japonia", "drivetrain": "AWD/RWD-biased", "livery": "Tak (własny widebody)", "drift": "Fabrycznie gotowy wygląd drift-build — dograj oponę driftową i zawieszenie.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/annis-elegy-retro-custom", "tags": ["street"]}, "Annis Elegy": {"real": "Nissan Skyline GT-R R33/R34", "country": "Japonia", "drivetrain": "AWD-biased", "livery": "Nie", "drift": "Podobnie jak RH8 — bardzo dobra baza po turbo i LSD.", "wiki": "https://www.google.com/search?q=site%3Agtabase.com%20Annis%20Elegy", "tags": ["street"]}, "Annis Savestra": {"real": "Nissan Silvia S13", "country": "Japonia", "drivetrain": "RWD, R4 turbo", "livery": "Nie", "drift": "Jedna z ikon driftu (S-chassis) — turbo, LSD, opona driftowa i jest gotowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/annis-savestra", "tags": ["drift"]}, "Annis Hellion": {"real": "Nissan Patrol / terenowy Nissan", "country": "Japonia", "drivetrain": "4x4/AWD", "livery": "Nie", "drift": "Terenowy układ napędu — do klasycznego drifta niepraktyczny, lepszy do off-road slajdów.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/hellion", "tags": ["offroad"]}, "Annis Hardy": {"real": "Nissan Hardbody (pickup)", "country": "Japonia", "drivetrain": "RWD (wersja 2WD) / 4x4", "livery": "Nie", "drift": "Wersja RWD to niezła zabawa driftowa dla pickupa — dograj LSD i oponę driftową.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/hardy", "tags": ["offroad"]}, "RUNE Cheburek": {"real": "Łada Niva / radziecki off-road", "country": "Rosja", "drivetrain": "4x4", "livery": "Nie", "drift": "Radziecki układ napędu — bardziej do zabawy w błocie/śniegu niż klasycznego drifta.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/rune-cheburek", "tags": ["offroad"]}, "Shitzu Keitora": {"real": "Toyota HiAce / kei truck", "country": "Japonia", "drivetrain": "RWD (wersja pickup)", "livery": "Nie", "drift": "Kultowy 'drift truck' na serwerach RP — lekka tylna oś ułatwia poślizg, dograj LSD.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/keitora", "tags": ["drift"]}, "Karin Hotring Everon": {"real": "Subaru Impreza (wyścigowa/hotring)", "country": "Japonia", "drivetrain": "AWD", "livery": "Nie", "drift": "Wersja wyścigowa — do drifta najlepiej z modem zmiany napędu na RWD.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/hotring-everon", "tags": ["street"]}, "Karin S95": {"real": "Subaru SVX", "country": "Japonia", "drivetrain": "AWD/RWD zależnie od configu", "livery": "Nie", "drift": "Sprawdź układ napędu w LS Customs; przy RWD to bardzo dobra klasyczna baza driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/s95", "tags": ["street"]}, "Karin Asterope GZ": {"real": "Toyota Mark II / Chaser JZX100", "country": "Japonia", "drivetrain": "RWD, R6 turbo", "livery": "Nie", "drift": "Legenda japońskiego driftu (Mark II/Chaser) — turbo, LSD, opona driftowa i gotowe.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/asterope-gz", "tags": ["drift"]}, "Karin Boor": {"real": "Toyota Land Cruiser", "country": "Japonia", "drivetrain": "4x4", "livery": "Nie", "drift": "SUV terenowy — słaba baza pod klasyczny drift, lepszy do jazdy terenowej.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/boor", "tags": ["offroad"]}, "Karin Vivanite": {"real": "Toyota Prius / hybryda miejska", "country": "Japonia", "drivetrain": "FWD", "livery": "Nie", "drift": "Napęd przedni i hybrydowy charakter — praktycznie nienadający się do drifta bez moda na RWD.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/vivanite", "tags": ["street"]}, "Karin Woodlander": {"real": "Subaru Outback / crossover terenowy", "country": "Japonia", "drivetrain": "AWD", "livery": "Nie", "drift": "Wysoki crossover — lepszy do driftu rajdowego/terenowego niż ulicznego.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/woodlander", "tags": ["offroad"]}, "Übermacht Zion": {"real": "BMW serii 6 Coupe", "country": "Niemcy", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Eleganckie GT z dużą mocą — dograj LSD i twardsze tylne zawieszenie pod drift.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/ubermacht-zion", "tags": ["drift"]}, "Übermacht Zion Classic": {"real": "BMW E24 6-Series", "country": "Niemcy", "drivetrain": "RWD, R6", "livery": "Nie", "drift": "Klasyczna sylwetka, RWD — dobra baza po turbo i oponie driftowej.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/zion-classic", "tags": ["drift"]}, "Übermacht Oracle": {"real": "BMW serii 3 Coupe (E92)", "country": "Niemcy", "drivetrain": "RWD, R6", "livery": "Nie", "drift": "Zbalansowany sedan sportowy — solidna baza driftowa po standardowym tuningu.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/ubermacht-oracle", "tags": ["drift"]}, "Übermacht Oracle XS": {"real": "BMW serii 3 (tuning M-Sport)", "country": "Niemcy", "drivetrain": "RWD, R6/V8", "livery": "Nie", "drift": "Mocniejsza wersja Oracle — turbo, LSD, opona driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/ubermacht-oracle-xs", "tags": ["drift"]}, "Übermacht Rhinehart": {"real": "BMW serii 4 Gran Coupe", "country": "Niemcy", "drivetrain": "RWD, R6", "livery": "Nie", "drift": "Podobny profil do Oracle — dobra, uniwersalna baza driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/rhinehart", "tags": ["drift"]}, "Übermacht Rebla GTS": {"real": "BMW X6 M", "country": "Niemcy", "drivetrain": "AWD, SUV", "livery": "Nie", "drift": "Ciężki SUV z AWD — trudny do klasycznego drifta, wymaga moda na RWD.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/rebla-gts", "tags": ["offroad"]}, "Übermacht Revolter": {"real": "BMW serii 3/4 Gran Coupe (sedan sportowy)", "country": "Niemcy", "drivetrain": "RWD, R6", "livery": "Nie", "drift": "Dobrze zbalansowany sedan — turbo i LSD wystarczą do dobrego drifta.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/ubermacht-revolter", "tags": ["drift"]}, "Übermacht Niobe": {"real": "BMW Z4", "country": "Niemcy", "drivetrain": "RWD, R6", "livery": "Nie", "drift": "Lekki roadster — bardzo responsywny w poślizgu, świetna baza driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/niobe", "tags": ["drift"]}, "Übermacht SC1": {"real": "BMW 8-Series (E31)", "country": "Niemcy", "drivetrain": "RWD, V8/V12", "livery": "Nie", "drift": "Duże, mocne GT — dograj usztywnione zawieszenie tylne i LSD.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/ubermacht-sc1", "tags": ["drift"]}, "Übermacht V-STR": {"real": "BMW Vision M NEXT (koncept)", "country": "Niemcy", "drivetrain": "RWD/AWD hybryda", "livery": "Nie", "drift": "Nowoczesny koncept — sprawdź w LS Customs realny układ napędu przed budową drift-setupu.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/v-str", "tags": ["street"]}, "Übermacht Schafter": {"real": "BMW serii 5", "country": "Niemcy", "drivetrain": "RWD, R6", "livery": "Nie", "drift": "Klasyczny sedan wykonawczy RWD — dobra, stabilna baza driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/benefactor-schafter", "tags": ["drift"]}, "Übermacht Schafter V12": {"real": "BMW serii 7 / Alpina B12", "country": "Niemcy", "drivetrain": "RWD, V12", "livery": "Nie", "drift": "Dużo mocy w ciężkim nadwoziu — mocne zawieszenie i szeroka opona to podstawa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/benefactor-schafter-v12", "tags": ["drift"]}, "Übermacht Schafter LWB": {"real": "BMW serii 7 (długi rozstaw osi)", "country": "Niemcy", "drivetrain": "RWD, R6/V8", "livery": "Nie", "drift": "Długi rozstaw osi utrudnia dynamiczny drift, ale nadal RWD — solidna, spokojniejsza baza.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/benefactor-schafter-lwb", "tags": ["drift"]}, "Benefactor Schwartzer": {"real": "Mercedes-AMG GT", "country": "Niemcy", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Bardzo mocna, agresywna baza RWD — turbo, LSD, opona driftowa i gotowe do street drifta.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/benefactor-schwartzer", "tags": ["drift"]}, "Benefactor Schlagen GT": {"real": "Mercedes-AMG C63 Coupe", "country": "Niemcy", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Klasyczny niemiecki muscle-coupe — mocna baza pod tandem drift.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/schlagen-gt", "tags": ["drift"]}, "Benefactor Surano": {"real": "Mercedes SL-Class", "country": "Niemcy", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Lekki roadster GT — dobrze się ślizga po dopracowaniu zawieszenia.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/benefactor-surano", "tags": ["drift"]}, "Benefactor Feltzer": {"real": "Mercedes SL-Class (starsza generacja)", "country": "Niemcy", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Klasyczny roadster RWD — prosta i skuteczna baza driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/benefactor-feltzer", "tags": ["drift"]}, "Benefactor Vorschlaghammer": {"real": "Mercedes-AMG C63 (drift build / DTM styl)", "country": "Niemcy", "drivetrain": "RWD, V8", "livery": "Tak (własny widebody/drift kit)", "drift": "Fabrycznie stylizowany pod drift/DTM — dograj tylko oponę driftową i finalne ustawienia zawieszenia.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/vorschlaghammer", "tags": ["drift"]}, "Benefactor Streiter": {"real": "Mercedes serii C", "country": "Niemcy", "drivetrain": "RWD, R6", "livery": "Nie", "drift": "Uniwersalny sedan sportowy — dobra, przewidywalna baza driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/benefactor-streiter", "tags": ["drift"]}, "Benefactor SM722": {"real": "Mercedes SLS AMG", "country": "Niemcy", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Mocny supersportowy silnik w lekkim nadwoziu — turbo, LSD, opona driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/sm722", "tags": ["drift"]}, "Benefactor Dubsta": {"real": "Mercedes G-Class (Gelände)", "country": "Niemcy", "drivetrain": "4x4", "livery": "Nie", "drift": "Kwadratowy SUV terenowy — słaby wybór pod klasyczny drift, lepszy do jazdy terenowej.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/benefactor-dubsta", "tags": ["offroad"]}, "Vapid Dominator": {"real": "Ford Mustang (5. generacja)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's Original Motor Works)", "drift": "Kultowy amerykański muscle — pakiet Benny's z widebody i drift tune czyni go jednym z najlepszych driftowych aut w grze.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/vapid-dominator", "tags": ["drift"]}, "Vapid Dominator GT": {"real": "Ford Mustang GT (nowsza generacja)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Podobnie jak Dominator — mocny silnik V8, pakiet Benny's, gotowy pod tandem drift.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/dominator-gt", "tags": ["drift"]}, "Vapid Dominator GTT": {"real": "Ford Mustang (turbo tuning)", "country": "USA", "drivetrain": "RWD, V8 turbo", "livery": "Tak (Benny's)", "drift": "Wersja turbo — jeszcze więcej mocy, ta sama sprawdzona platforma driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/dominator-gtt", "tags": ["drift"]}, "Vapid Dominator FX": {"real": "Ford Mustang (widebody/pro-street)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Wersja widebody gotowa do zawodów drift/pro-street — dograj tylko finalne zawieszenie.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/dominator-fx", "tags": ["drift"]}, "Bravado Gauntlet": {"real": "Dodge Charger (współczesny)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Ciężki amerykański sedan-muscle — z pakietem Benny's staje się bardzo skuteczną maszyną driftową.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/bravado-gauntlet", "tags": ["drift"]}, "Bravado Gauntlet Hellfire": {"real": "Dodge Charger Hellcat", "country": "USA", "drivetrain": "RWD, V8 kompresor", "livery": "Tak (Benny's)", "drift": "Wersja z ogromną mocą (styl Hellcat) — kontroluj poślizg szeroką oponą driftową i mocnym LSD.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/gauntlet-hellfire", "tags": ["drift"]}, "Declasse Vigero": {"real": "Chevrolet Camaro (3. generacja)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Klasyczny muscle car — turbo/wolnossący V8, LSD i opona driftowa to cały przepis.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/declasse-vigero", "tags": ["drift"]}, "Declasse Vigero ZX": {"real": "Chevrolet Camaro (nowsza generacja)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Nowocześniejsza wersja Vigero — ta sama sprawdzona formuła driftowa RWD V8.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/vigero-zx", "tags": ["drift"]}, "Declasse Drift Tampa": {"real": "Plymouth Barracuda (drift build)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (fabryczny drift kit)", "drift": "Fabrycznie gotowy drift car — od razu nadaje się do jazdy, dostrój tylko zawieszenie do swojego stylu.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/declasse-tampa-drift", "tags": ["drift"]}, "Declasse Tampa": {"real": "Plymouth Barracuda", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Klasyczny muscle — po Benny's i standardowym tuningu bardzo dobra baza driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/declasse-tampa", "tags": ["drift"]}, "Declasse Drift Yosemite": {"real": "Chevrolet C10 (drift build)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (fabryczny drift kit)", "drift": "Pickup w wersji drift-ready — gotowy do jazdy od razu po dograniu opon.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/drift-yosemite", "tags": ["drift"]}, "Declasse Yosemite": {"real": "Chevrolet C10", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Klasyczny pickup RWD — po Benny's staje się bardzo dobrym autem driftowym.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/declasse-yosemite", "tags": ["drift"]}, "Declasse Impaler": {"real": "Chevrolet Impala (lata 60.)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Ciężki klasyk RWD — usztywnij zawieszenie i dograj szeroką oponę driftową.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/impaler", "tags": ["drift"]}, "Declasse Impaler SZ": {"real": "Chevrolet Impala SS", "country": "USA", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Mocniejsza wersja Impalera — ta sama filozofia budowy driftowej co bazowy model.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/impaler-sz", "tags": ["drift"]}, "Declasse Sabre Turbo": {"real": "Buick Regal / Grand National", "country": "USA", "drivetrain": "RWD, V6 turbo", "livery": "Tak (Benny's)", "drift": "Kultowy turbo muscle — z Benny's i drift tune to jeden z lepszych wyborów na driftowym serwerze.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/declasse-sabre-turbo", "tags": ["drift"]}, "Declasse Sabre Turbo Custom": {"real": "Buick Grand National (custom widebody)", "country": "USA", "drivetrain": "RWD, V6 turbo", "livery": "Tak (Benny's)", "drift": "Wersja z dodatkowym stylingiem — ten sam skuteczny driftowy układ RWD turbo.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/declasse-sabre-turbo-custom", "tags": ["drift"]}, "Bravado Gauntlet Classic": {"real": "Dodge Charger (1969)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Klasyczny muscle car — ciężki, ale po Benny's i LSD potrafi ślizgać się bardzo efektownie.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/gauntlet-classic", "tags": ["drift"]}, "Bravado Gauntlet Classic Custom": {"real": "Dodge Charger 1969 (custom)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Stylowa wersja custom — identyczna baza mechaniczna co Gauntlet Classic.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/gauntlet-classic-custom", "tags": ["drift"]}, "Bravado Buffalo": {"real": "Dodge Charger (współczesny, sportowy)", "country": "USA", "drivetrain": "RWD/AWD zależnie od wersji", "livery": "Tak (Benny's - niektóre warianty)", "drift": "Sprawdź układ napędu w LS Customs — wersja RWD jest bardzo dobrą bazą driftową.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/bravado-buffalo", "tags": ["street"]}, "Bravado Buffalo S": {"real": "Dodge Charger SRT", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Mocna wersja S — po dograniu LSD i opony driftowej gotowa do agresywnego street drifta.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/bravado-buffalo-s", "tags": ["drift"]}, "Bravado Buffalo STX": {"real": "Dodge Charger (sportowa uliczna)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Solidna uliczna baza RWD — turbo, LSD, opona driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/buffalo-stx", "tags": ["drift"]}, "Imponte Ruiner": {"real": "Chevrolet Camaro (2. generacja)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Agresywny muscle car — klasyczny zestaw: turbo, LSD, opona driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/imponte-ruiner", "tags": ["drift"]}, "Imponte Phoenix": {"real": "Pontiac Firebird", "country": "USA", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Lekka konstrukcja jak na muscle cara — bardzo dobrze reaguje na tuning driftowy.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/imponte-phoenix", "tags": ["drift"]}, "Imponte Dukes": {"real": "Dodge Charger 1969 (Dukes of Hazzard)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Kultowy klasyk — ciężki, ale efektowny w poślizgu po usztywnieniu zawieszenia.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/imponte-dukes", "tags": ["drift"]}, "Imponte Beater Dukes": {"real": "Dodge Charger 1969 (zniszczona wersja)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Mechanicznie identyczny jak Dukes — tylko wygląd 'rozbitego' auta.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/beater-dukes", "tags": ["drift"]}, "Imponte Nightshade": {"real": "Chevrolet Chevelle SS", "country": "USA", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Ciężki klasyczny muscle — mocne zawieszenie tylne i szeroka opona driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/imponte-nightshade", "tags": ["drift"]}, "Willard Faction": {"real": "Chevrolet Monte Carlo", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Popularny wybór na serwerach lowrider/drift — po Benny's bardzo dobra baza.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/willard-faction", "tags": ["drift"]}, "Willard Faction Custom": {"real": "Chevrolet Monte Carlo (custom lowrider)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Ta sama mechanika co Faction — stylistyka custom/lowrider.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/willard-faction-custom", "tags": ["drift"]}, "Willard Faction Custom Donk": {"real": "Chevrolet Monte Carlo Donk", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Wersja 'donk' na dużych felgach — możliwa do drifta, ale wymaga dopracowania geometrii zawieszenia.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/willard-faction-custom-donk", "tags": ["drift"]}, "Vapid Blade": {"real": "Ford Fairlane / Galaxie (lata 60.)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Klasyczny pełnowymiarowy Ford — ciężki, ale skuteczny po Benny's i mocnym LSD.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/vapid-blade", "tags": ["drift"]}, "Vapid Chino": {"real": "Chevrolet El Camino", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Coupe-pickup RWD — bardzo dobra i lekka baza driftowa po Benny's.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/vapid-chino", "tags": ["drift"]}, "Vapid Chino Custom": {"real": "Chevrolet El Camino (custom lowrider)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Ta sama platforma co Chino, stylistyka custom.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/vapid-chino-custom", "tags": ["drift"]}, "Vapid Slamvan": {"real": "Chevrolet Panel Van (hot rod van)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Nietypowy van hot-rod — zaskakująco dobrze się ślizga po Benny's i LSD.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/vapid-slamvan", "tags": ["drift"]}, "Vapid Slamvan Custom": {"real": "Chevrolet Panel Van (custom)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Identyczna mechanika co Slamvan, inny styling.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/vapid-slamvan-custom", "tags": ["drift"]}, "Vapid Hustler": {"real": "Ford Falcon / Torino (lata 70.)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Klasyczny sedan RWD — turbo, LSD, opona driftowa i solidna baza gotowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/vapid-hustler", "tags": ["drift"]}, "Vapid Clique": {"real": "Ford Torino (kombi/fastback)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Podobna platforma do Hustlera — dobra klasyczna baza driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/clique", "tags": ["drift"]}, "Vapid Ellie": {"real": "Ford Model A Hot Rod", "country": "USA", "drivetrain": "RWD", "livery": "Nie", "drift": "Bardzo lekki hot rod — łatwo wchodzi w poślizg, ale wymaga precyzyjnego panowania nad tylną osią.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/vapid-ellie", "tags": ["drift"]}, "Albany Buccaneer": {"real": "Buick Riviera / Mercury Cougar", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Duży klasyczny muscle — po Benny's i LSD potrafi efektownie driftować mimo masy.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/albany-buccaneer", "tags": ["drift"]}, "Albany Buccaneer Custom": {"real": "Mercury Cougar (custom lowrider)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Ta sama mechanika co Buccaneer, styling custom.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/albany-buccaneer-custom", "tags": ["drift"]}, "Albany Virgo": {"real": "Lincoln Continental Mark III", "country": "USA", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Bardzo ciężki klasyk — wymaga mocnego zawieszenia tylnego i szerokiej opony driftowej.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/albany-virgo", "tags": ["drift"]}, "Albany Hermes": {"real": "Ford Torino / Fairlane (1970)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Klasyczny pełnowymiarowy Ford — solidna, ciężka baza pod drift po dopracowaniu zawieszenia.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/albany-hermes", "tags": ["drift"]}, "Declasse Mamba": {"real": "Shelby Cobra / AC Cobra", "country": "USA/UK", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Bardzo lekki roadster z dużą mocą — ekstremalnie responsywny w poślizgu, ostrożnie z gazem.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/declasse-mamba", "tags": ["drift"]}, "Coquette BlackFin": {"real": "Chevrolet Corvette (lata 60., custom)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Lekka sportowa konstrukcja — turbo, LSD i opona driftowa dają bardzo dynamiczny drift.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/invetero-coquette-blackfin", "tags": ["drift"]}, "Dewbauchee Rapid GT": {"real": "Aston Martin DB9 / Vantage", "country": "Wielka Brytania", "drivetrain": "RWD, V8/V12", "livery": "Nie", "drift": "Eleganckie GT o dużej mocy — mocne tylne zawieszenie i LSD to podstawa drift-setupu.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/dewbauchee-rapid-gt", "tags": ["drift", "street"]}, "Dewbauchee Rapid GT Classic": {"real": "Aston Martin DB5/DB6", "country": "Wielka Brytania", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Klasyczna sylwetka, RWD — dobra, elegancka baza driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/dewbauchee-rapid-gt-classic", "tags": ["drift", "street"]}, "Dewbauchee Massacro": {"real": "Aston Martin Vanquish / Ferrari FF", "country": "Wielka Brytania", "drivetrain": "RWD/AWD zależnie od wersji", "livery": "Nie", "drift": "Sprawdź napęd w LS Customs — wersja RWD nadaje się do driftu, AWD wymaga moda.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/dewbauchee-massacro", "tags": ["street"]}, "Dewbauchee Specter": {"real": "Aston Martin DB11", "country": "Wielka Brytania", "drivetrain": "RWD, V12", "livery": "Nie", "drift": "Nowoczesne luksusowe GT — RWD i dużo mocy, dobra baza po standardowym tuningu.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/dewbauchee-specter", "tags": ["drift", "street"]}, "Dewbauchee Specter Custom": {"real": "Aston Martin DB11 (custom)", "country": "Wielka Brytania", "drivetrain": "RWD, V12", "livery": "Nie", "drift": "Ta sama mechanika co Specter, dodatkowy styling.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/dewbauchee-specter-custom", "tags": ["drift", "street"]}, "Dewbauchee Exemplar": {"real": "Bentley Continental GT", "country": "Wielka Brytania", "drivetrain": "RWD, V8/V12", "livery": "Nie", "drift": "Ciężkie luksusowe coupe — wymaga mocnego zawieszenia tylnego, by dobrze ślizgać się na driftach.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/dewbauchee-exemplar", "tags": ["drift"]}, "Ocelot Jackal": {"real": "Aston Martin Rapide", "country": "Wielka Brytania", "drivetrain": "RWD, V12", "livery": "Nie", "drift": "4-drzwiowe GT o dużej mocy — solidna baza driftowa po dopracowaniu LSD.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/ocelot-jackal", "tags": ["drift", "street"]}, "Ocelot F620": {"real": "Jaguar XK", "country": "Wielka Brytania", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Klasyczne brytyjskie coupe — dobrze reaguje na standardowy tuning driftowy.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/ocelot-f620", "tags": ["drift"]}, "Ocelot Felon": {"real": "Jaguar XF", "country": "Wielka Brytania", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Sportowy sedan RWD — turbo, LSD, opona driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/lampadati-felon", "tags": ["drift"]}, "Ocelot Felon GT": {"real": "Jaguar XFR-S", "country": "Wielka Brytania", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Mocniejsza wersja Felona — ta sama sprawdzona baza driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/lampadati-felon-gt", "tags": ["drift"]}, "Lampadati Felon": {"real": "Maserati GranTurismo", "country": "Włochy", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Włoskie GT o dużej kulturze prowadzenia — dobra, przewidywalna baza driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/lampadati-felon", "tags": ["drift"]}, "Lampadati Komoda": {"real": "Alfa Romeo Giulia GTA", "country": "Włochy", "drivetrain": "RWD, V6", "livery": "Nie", "drift": "Lekka i zwrotna — jedna z lepszych europejskich baz driftowych w grze.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/komoda", "tags": ["drift"]}, "Lampadati Pigalle": {"real": "Maserati Ghibli (lata 60.)", "country": "Włochy", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Klasyczne włoskie coupe — usztywnij zawieszenie tylne i dograj oponę driftową.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/lampadati-pigalle", "tags": ["drift"]}, "Lampadati Tigon": {"real": "Maserati Levante", "country": "Włochy", "drivetrain": "AWD, SUV", "livery": "Nie", "drift": "SUV z AWD — trudny do klasycznego drifta, lepszy do jazdy terenowej.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/tigon", "tags": ["offroad"]}, "Obey 9F": {"real": "Audi RS5", "country": "Niemcy", "drivetrain": "AWD/RWD zależnie od wersji", "livery": "Nie", "drift": "Sprawdź napęd — wersja z RWD-biased jest niezłą bazą, AWD lepiej modować na RWD.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/obey-9f", "tags": ["street"]}, "Obey 9F Cabrio": {"real": "Audi RS5 Cabriolet", "country": "Niemcy", "drivetrain": "AWD/RWD zależnie od wersji", "livery": "Nie", "drift": "Ta sama platforma co 9F w wersji kabrio.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/obey-9f-cabrio", "tags": ["street"]}, "Obey 8F Drafter": {"real": "Audi RS7", "country": "Niemcy", "drivetrain": "AWD, V8", "livery": "Nie", "drift": "Mocny liftback AWD — do drifta najlepiej z modem na RWD lub jazda w stylu rajdowym.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/drafter-8f", "tags": ["street"]}, "Obey Tailgater": {"real": "Audi A6/S6", "country": "Niemcy", "drivetrain": "AWD, V6", "livery": "Nie", "drift": "Solidny sedan wykonawczy — podobnie jak inne Audi w grze, AWD utrudnia klasyczny drift.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/obey-tailgater", "tags": ["street"]}, "Obey Tailgater S": {"real": "Audi S6/RS6", "country": "Niemcy", "drivetrain": "AWD, V8", "livery": "Nie", "drift": "Mocniejsza wersja Tailgatera — te same ograniczenia AWD co bazowy model.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/tailgater-s", "tags": ["street"]}, "Pfister Comet": {"real": "Porsche 911 (997)", "country": "Niemcy", "drivetrain": "RWD, silnik bokser tylny", "livery": "Nie", "drift": "Klasyczne 911 — silnik z tyłu daje specyficzne, ale bardzo satysfakcjonujące zachowanie w drifcie.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/pfister-comet", "tags": ["drift", "street"]}, "Pfister Comet Retro Custom": {"real": "Porsche 911 (klasyczne, widebody)", "country": "Niemcy", "drivetrain": "RWD, bokser", "livery": "Tak (własny widebody)", "drift": "Gotowy widebody drift-look — dograj tylko oponę driftową i finalne zawieszenie.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/pfister-comet-retro-custom", "tags": ["drift", "street"]}, "Pfister Comet S2": {"real": "Porsche 911 GT3", "country": "Niemcy", "drivetrain": "RWD, bokser", "livery": "Nie", "drift": "Wyścigowa wersja 911 — bardzo precyzyjna, ale wymagająca w kontrolowaniu poślizgu.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/comet-s2", "tags": ["drift", "street"]}, "Pfister Growler": {"real": "Porsche Cayman/Boxster", "country": "Niemcy", "drivetrain": "RWD, silnik centralny", "livery": "Nie", "drift": "Silnik centralny daje inny balans niż klasyczne 911 — mniej podsterowności, świetne do drifta.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/growler", "tags": ["drift", "street"]}, "Pfister Neon": {"real": "Porsche 718 Cayman GT4", "country": "Niemcy", "drivetrain": "RWD, silnik centralny", "livery": "Nie", "drift": "Nowoczesna, lekka konstrukcja z silnikiem centralnym — bardzo dobra baza driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/pfister-neon", "tags": ["drift", "street"]}, "Grotti Carbonizzare": {"real": "Ferrari 458 Italia", "country": "Włochy", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Supersportowy silnik centralny — wymaga wprawy, ale daje spektakularny drift.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/grotti-carbonizzare", "tags": ["drift", "street"]}, "Grotti Bestia GTS": {"real": "Ferrari GTC4Lusso", "country": "Włochy", "drivetrain": "RWD/AWD zależnie od wersji", "livery": "Nie", "drift": "Sprawdź układ napędu przed budową setupu driftowego.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/grotti-bestia-gts", "tags": ["street"]}, "Grotti Stinger": {"real": "Ferrari 250 GTO / Daytona", "country": "Włochy", "drivetrain": "RWD, V12", "livery": "Nie", "drift": "Klasyczne Ferrari — elegancka, responsywna baza driftowa RWD.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/grotti-stinger", "tags": ["drift", "street"]}, "Grotti Stinger GT": {"real": "Ferrari Daytona (wersja coupe)", "country": "Włochy", "drivetrain": "RWD, V12", "livery": "Nie", "drift": "Podobna platforma do Stingera — dobra klasyczna baza driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/grotti-stinger-gt", "tags": ["drift", "street"]}, "Grotti Itali GTO": {"real": "Ferrari 488 GTB", "country": "Włochy", "drivetrain": "RWD, V8 turbo", "livery": "Nie", "drift": "Nowoczesny supersamochód — dużo mocy, wymagający, ale świetny w rękach doświadczonego driftera.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/itali-gto", "tags": ["drift", "street"]}, "Grotti Furia": {"real": "Ferrari SF90 Stradale", "country": "Włochy", "drivetrain": "AWD (hybryda)", "livery": "Nie", "drift": "Hybrydowy AWD — do klasycznego driftu wymaga moda na RWD.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/furia", "tags": ["street"]}, "Progen T20": {"real": "McLaren P1", "country": "Wielka Brytania", "drivetrain": "RWD, V8 turbo hybryda", "livery": "Nie", "drift": "Hypercar — ogromna moc w lekkim nadwoziu, bardzo wymagający w kontrolowaniu poślizgu.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/progen-t20", "tags": ["drift", "street"]}, "Truffade Z-Type": {"real": "Ferrari 250 GT / klasyczny roadster", "country": "Włochy", "drivetrain": "RWD, V12", "livery": "Nie", "drift": "Elegancki klasyczny roadster — lekki i responsywny w poślizgu.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/truffade-z-type", "tags": ["drift", "street"]}, "Truffade Adder": {"real": "Bugatti Veyron/Chiron", "country": "Francja", "drivetrain": "AWD, W16", "livery": "Nie", "drift": "Hypercar AWD o ogromnej mocy — do driftu praktycznie wymaga moda zmiany napędu na RWD.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/truffade-adder", "tags": ["street"]}, "Declasse Tornado": {"real": "Chevrolet Bel Air (1957)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Amerykańska klasyka lat 50. — po Benny's i LSD bardzo efektowna w driftach kołowych.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/declasse-tornado", "tags": ["drift"]}, "Declasse Tornado Custom": {"real": "Chevrolet Bel Air (custom lowrider)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Ta sama mechanika co Tornado, styling lowrider.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/declasse-tornado-custom", "tags": ["drift"]}, "Declasse Tornado Rat Rod": {"real": "Chevrolet Bel Air (rat rod)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Wersja rat-rod — surowy wygląd, identyczna platforma driftowa co bazowy Tornado.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/declasse-tornado-rat-rod", "tags": ["drift"]}, "Declasse Tornado Mariachi": {"real": "Chevrolet Bel Air (wersja tematyczna)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Ta sama mechanika co Tornado — inny motyw stylistyczny.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/tornado-mariachi", "tags": ["drift"]}, "Vapid Peyote": {"real": "Chevrolet Impala Convertible (lata 60.)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Kultowy lowrider — po Benny's i mocnym LSD sprawdza się też jako bardzo widowiskowy driftowiec.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/vapid-peyote", "tags": ["drift"]}, "Vapid Peyote Custom": {"real": "Chevrolet Impala Convertible (custom)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Ta sama platforma co Peyote, dodatkowy styling.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/peyote-custom", "tags": ["drift"]}, "Vapid Retinue": {"real": "Ford Torino GT (1970)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Klasyczny muscle-coupe — turbo, LSD i opona driftowa to sprawdzony zestaw.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/vapid-retinue", "tags": ["drift"]}, "Vapid Retinue Mk II": {"real": "Ford Torino GT (odświeżona wersja)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Nie", "drift": "Ta sama platforma co Retinue z drobnymi zmianami stylistycznymi.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/retinue-mk-ii", "tags": ["drift"]}, "Lampadati Casco": {"real": "Maserati Mistral (kabriolet)", "country": "Włochy", "drivetrain": "RWD, V6", "livery": "Nie", "drift": "Lekki klasyczny roadster — bardzo dobra, zwinna baza driftowa.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/lampadati-casco", "tags": ["drift"]}, "Benefactor Stirling GT": {"real": "Jaguar E-Type", "country": "Wielka Brytania", "drivetrain": "RWD, R6", "livery": "Nie", "drift": "Ikona klasycznego GT — elegancka, lekka konstrukcja, świetnie się ślizga po dopracowaniu zawieszenia.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/benefactor-stirling-gt", "tags": ["drift"]}, "Benefactor Glendale": {"real": "Mercedes W123 Coupe", "country": "Niemcy", "drivetrain": "RWD, R6", "livery": "Tak (Benny's)", "drift": "Klasyczny niemiecki sedan/coupe — po Benny's staje się bardzo kompetentnym autem driftowym.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/benefactor-glendale", "tags": ["drift"]}, "Benefactor Glendale Custom": {"real": "Mercedes W123 Coupe (custom lowrider)", "country": "Niemcy", "drivetrain": "RWD, R6", "livery": "Tak (Benny's)", "drift": "Ta sama platforma co Glendale, styling custom.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/glendale-custom", "tags": ["drift"]}, "Albany Manana": {"real": "Buick Riviera / Ford Thunderbird (lata 60.)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Klasyczny amerykański coupe — po Benny's dobra baza pod widowiskowy street drift.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/albany-manana", "tags": ["drift"]}, "Albany Manana Custom": {"real": "Ford Thunderbird (custom lowrider)", "country": "USA", "drivetrain": "RWD, V8", "livery": "Tak (Benny's)", "drift": "Ta sama mechanika co Manana, styling custom.", "wiki": "https://www.gtabase.com/grand-theft-auto-v/vehicles/manana-custom", "tags": ["drift"]}};
+const OWNERS = ["Sindgrid", "Ingrid", "Astrid"];
+const OWNER_CLASS = {Sindgrid:"sindgrid", Ingrid:"ingrid", Astrid:"astrid"};
+const STORAGE_KEY = "car-tracker-state-v1";
+
+let state = {}; // { [carId]: { status, owner } }
+let currentFilter = { type: "all", value: null }; // type: all | category | owner | livery | tag
+let searchTerm = "";
+let statusFilter = "all";
+let sortBy = "default";
+let showGuide = false;
+
+function defaultEntry(car){
+  return { status: car.status === "Planowany" ? "Planowany" : "Planowany", owner: null };
+}
+
+function getEntry(car){
+  if(!state[car.id]) state[car.id] = defaultEntry(car);
+  return state[car.id];
+}
+
+async function loadState(){
+  try{
+    const res = await window.storage.get(STORAGE_KEY, false);
+    if(res && res.value){
+      state = JSON.parse(res.value);
+    }
+  }catch(e){
+    state = {};
+  }
+}
+
+let saveTimer = null;
+function persistState(){
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(async () => {
+    try{
+      await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+      const ind = document.getElementById("save-indicator");
+      ind.classList.add("show");
+      setTimeout(()=>ind.classList.remove("show"), 900);
+    }catch(e){
+      console.error("Nie udało się zapisać stanu", e);
+    }
+  }, 250);
+}
+
+function getCategories(){
+  const set = [];
+  CARS.forEach(c => { if(!set.includes(c.category)) set.push(c.category); });
+  return set;
+}
+
+function countForCategory(cat){
+  return CARS.filter(c => c.category === cat).length;
+}
+function countForOwner(owner){
+  return CARS.filter(c => getEntry(c).owner === owner).length;
+}
+function countOwnedTotal(){
+  return CARS.filter(c => getEntry(c).status === "Owned").length;
+}
+function hasLivery(car){
+  const info = LOOKUP[car.name];
+  return info && info.livery && info.livery.startsWith("Tak");
+}
+function hasTag(car, tag){
+  const info = LOOKUP[car.name];
+  return info && Array.isArray(info.tags) && info.tags.includes(tag);
+}
+
+function renderSidebar(){
+  const allWrap = document.getElementById("nav-all");
+  allWrap.innerHTML = "";
+  const allItem = document.createElement("div");
+  allItem.className = "nav-item" + (currentFilter.type === "all" ? " active" : "");
+  allItem.innerHTML = `<span class="nav-item-label"><span class="dot" style="background:var(--amber)"></span>Wszystkie</span><span class="count">${CARS.length}</span>`;
+  allItem.onclick = () => { currentFilter = {type:"all", value:null}; showGuide = false; render(); };
+  allWrap.appendChild(allItem);
+
+  const catWrap = document.getElementById("nav-categories");
+  catWrap.innerHTML = "";
+  getCategories().forEach(cat => {
+    const item = document.createElement("div");
+    const active = currentFilter.type === "category" && currentFilter.value === cat;
+    item.className = "nav-item" + (active ? " active" : "");
+    item.innerHTML = `<span class="nav-item-label"><span class="dot"></span>${cat}</span><span class="count">${countForCategory(cat)}</span>`;
+    item.onclick = () => { currentFilter = {type:"category", value:cat}; showGuide = false; render(); };
+    catWrap.appendChild(item);
+  });
+
+  const ownerWrap = document.getElementById("nav-owners");
+  ownerWrap.innerHTML = "";
+  OWNERS.forEach(owner => {
+    const item = document.createElement("div");
+    const active = currentFilter.type === "owner" && currentFilter.value === owner;
+    item.className = "nav-item" + (active ? " active" : "");
+    const colorVar = `var(--${OWNER_CLASS[owner]})`;
+    item.innerHTML = `<span class="nav-item-label"><span class="dot" style="background:${colorVar}"></span>${owner}</span><span class="count">${countForOwner(owner)}</span>`;
+    item.onclick = () => { currentFilter = {type:"owner", value:owner}; showGuide = false; render(); };
+    ownerWrap.appendChild(item);
+  });
+
+  const specialWrap = document.getElementById("nav-special");
+  specialWrap.innerHTML = "";
+  const liveryCount = CARS.filter(c => hasLivery(c)).length;
+  const liveryItem = document.createElement("div");
+  const liveryActive = currentFilter.type === "livery";
+  liveryItem.className = "nav-item" + (liveryActive ? " active" : "");
+  liveryItem.innerHTML = `<span class="nav-item-label"><span class="dot" style="background:var(--owned)"></span>Z okleinami</span><span class="count">${liveryCount}</span>`;
+  liveryItem.onclick = () => { currentFilter = {type:"livery", value:null}; showGuide = false; render(); };
+  specialWrap.appendChild(liveryItem);
+
+  const TAG_LABELS = { drift: "Pod drift", street: "Pod wyścig uliczny", offroad: "Pod offroad" };
+  Object.keys(TAG_LABELS).forEach(tag => {
+    const count = CARS.filter(c => hasTag(c, tag)).length;
+    const item = document.createElement("div");
+    const active = currentFilter.type === "tag" && currentFilter.value === tag;
+    item.className = "nav-item" + (active ? " active" : "");
+    item.innerHTML = `<span class="nav-item-label"><span class="dot"></span>${TAG_LABELS[tag]}</span><span class="count">${count}</span>`;
+    item.onclick = () => { currentFilter = {type:"tag", value:tag}; showGuide = false; render(); };
+    specialWrap.appendChild(item);
+  });
+}
+
+function visibleCars(){
+  let list = CARS.slice();
+  if(currentFilter.type === "category"){
+    list = list.filter(c => c.category === currentFilter.value);
+  }else if(currentFilter.type === "owner"){
+    list = list.filter(c => getEntry(c).owner === currentFilter.value);
+  }else if(currentFilter.type === "livery"){
+    list = list.filter(c => hasLivery(c));
+  }else if(currentFilter.type === "tag"){
+    list = list.filter(c => hasTag(c, currentFilter.value));
+  }
+  if(statusFilter !== "all"){
+    list = list.filter(c => getEntry(c).status === statusFilter);
+  }
+  if(searchTerm.trim()){
+    const t = searchTerm.trim().toLowerCase();
+    list = list.filter(c => c.name.toLowerCase().includes(t) || c.notes.toLowerCase().includes(t) || c.category.toLowerCase().includes(t));
+  }
+  if(sortBy === "name"){
+    list.sort((a,b) => a.name.localeCompare(b.name));
+  }else if(sortBy === "brand"){
+    list.sort((a,b) => a.brand.localeCompare(b.brand) || a.name.localeCompare(b.name));
+  }else if(sortBy === "rating-desc"){
+    list.sort((a,b) => b.rating - a.rating);
+  }
+  return list;
+}
+
+function renderTitle(){
+  const title = document.getElementById("view-title");
+  const sub = document.getElementById("view-sub");
+  if(currentFilter.type === "all"){
+    title.textContent = "Wszystkie pojazdy";
+    sub.textContent = "Pełny katalog kandydatów do driftowego garażu";
+  }else if(currentFilter.type === "category"){
+    title.textContent = currentFilter.value;
+    sub.textContent = "Kategoria z oryginalnego katalogu";
+  }else if(currentFilter.type === "owner"){
+    title.textContent = currentFilter.value;
+    sub.textContent = "Pojazdy przypisane do tej osoby";
+  }else if(currentFilter.type === "livery"){
+    title.textContent = "Z okleinami";
+    sub.textContent = "Pojazdy z dostępnym pakietem oklein / widebody (np. Benny's)";
+  }else if(currentFilter.type === "tag"){
+    const TAG_LABELS = { drift: "Pod drift", street: "Pod wyścig uliczny", offroad: "Pod offroad" };
+    const TAG_SUB = {
+      drift: "Pojazdy RWD dobrze przystosowane do driftu",
+      street: "Pojazdy AWD/FWD lub o dużej mocy, lepsze do wyścigów ulicznych z przyczepnością",
+      offroad: "Pojazdy terenowe / 4x4, lepsze poza asfaltem"
+    };
+    title.textContent = TAG_LABELS[currentFilter.value];
+    sub.textContent = TAG_SUB[currentFilter.value];
+  }
+}
+
+function renderStats(list){
+  document.getElementById("stat-total").textContent = list.length;
+  document.getElementById("stat-owned").textContent = list.filter(c => getEntry(c).status === "Owned").length;
+  document.getElementById("stat-assigned").textContent = list.filter(c => getEntry(c).owner).length;
+}
+
+function renderTable(){
+  const list = visibleCars();
+  const tbody = document.getElementById("table-body");
+  const emptyState = document.getElementById("empty-state");
+  tbody.innerHTML = "";
+
+  if(list.length === 0){
+    emptyState.style.display = "block";
+  }else{
+    emptyState.style.display = "none";
+  }
+
+  list.forEach(car => {
+    const entry = getEntry(car);
+    const tr = document.createElement("tr");
+
+    const tdName = document.createElement("td");
+    const nameBtn = document.createElement("button");
+    nameBtn.className = "car-name-btn";
+    nameBtn.textContent = car.name;
+    nameBtn.onclick = () => openModal(car);
+    tdName.appendChild(nameBtn);
+    tr.appendChild(tdName);
+
+    const tdCat = document.createElement("td");
+    tdCat.innerHTML = `<span class="cat-chip">${car.category}</span>`;
+    tr.appendChild(tdCat);
+
+    const tdRating = document.createElement("td");
+    tdRating.innerHTML = `<span class="rating">${car.rating.toFixed(1)}</span>`;
+    tr.appendChild(tdRating);
+
+    const tdStatus = document.createElement("td");
+    const isOwned = entry.status === "Owned";
+    const btn = document.createElement("button");
+    btn.className = "status-btn " + (isOwned ? "owned" : "planned");
+    btn.textContent = isOwned ? "Owned" : "Planowany";
+    btn.onclick = () => {
+      entry.status = isOwned ? "Planowany" : "Owned";
+      persistState();
+      render();
+    };
+    tdStatus.appendChild(btn);
+    tr.appendChild(tdStatus);
+
+    const tdAssign = document.createElement("td");
+    const sel = document.createElement("select");
+    sel.className = "assign-select" + (entry.owner ? " " + OWNER_CLASS[entry.owner] : "");
+    const noneOpt = document.createElement("option");
+    noneOpt.value = "";
+    noneOpt.textContent = "— brak —";
+    sel.appendChild(noneOpt);
+    OWNERS.forEach(o => {
+      const opt = document.createElement("option");
+      opt.value = o;
+      opt.textContent = o;
+      if(entry.owner === o) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    sel.onchange = () => {
+      entry.owner = sel.value || null;
+      persistState();
+      render();
+    };
+    tdAssign.appendChild(sel);
+    tr.appendChild(tdAssign);
+
+    tbody.appendChild(tr);
+  });
+
+  renderStats(list);
+}
+
+function render(){
+  renderSidebar();
+  document.getElementById("nav-guide").classList.toggle("active", showGuide);
+
+  const controlsRow = document.getElementById("controls-row");
+  const statsRow = document.getElementById("stats-row");
+  const tableWrap = document.getElementById("table-wrap");
+  const guideView = document.getElementById("guide-view");
+
+  if(showGuide){
+    controlsRow.style.display = "none";
+    statsRow.style.display = "none";
+    tableWrap.style.display = "none";
+    guideView.style.display = "block";
+    document.getElementById("view-title").textContent = "Poradnik driftu w GTA V";
+    document.getElementById("view-sub").textContent = "Jak ustawienia z LS Customs przekładają się na zachowanie auta w poślizgu";
+    renderGuide();
+  }else{
+    controlsRow.style.display = "";
+    statsRow.style.display = "";
+    tableWrap.style.display = "";
+    guideView.style.display = "none";
+    renderTitle();
+    renderTable();
+  }
+}
+
+document.getElementById("nav-guide").addEventListener("click", () => {
+  showGuide = true;
+  render();
+});
+
+function renderGuide(){
+  const guideView = document.getElementById("guide-view");
+  guideView.innerHTML = `
+    <div class="guide-intro">
+      Poniżej dokładnie te kategorie i nazwy, jakie zobaczysz w menu Los Santos Customs (i u Benny'ego, jeśli auto obsługuje jego pakiety) — oraz jak każda z nich realnie przekłada się na jazdę bokiem.
+    </div>
+
+    <div class="guide-section">
+      <span class="guide-tag">LS Customs → Brakes</span>
+      <h3>Hamulce (Street / Sport / Race Brakes)</h3>
+      <table class="guide-table">
+        <tr><th>Poziom</th><th>Efekt</th></tr>
+        <tr><td>Street Brakes</td><td>Poziom bazowy, długi dystans hamowania — słabo nadaje się pod drift.</td></tr>
+        <tr><td>Sport Brakes</td><td>Wyraźnie krótszy dystans, lepsza precyzja przy wejściu w zakręt.</td></tr>
+        <tr><td>Race Brakes</td><td>Najkrótszy dystans hamowania — pozwala na bardzo precyzyjne "obcięcie" prędkości tuż przed zakrętem, co jest podstawą techniki feint/scandinavian flick.</td></tr>
+      </table>
+      <p><strong>Pod drift:</strong> zawsze <strong>Race Brakes</strong>.</p>
+    </div>
+
+    <div class="guide-section">
+      <span class="guide-tag">LS Customs → Transmission</span>
+      <h3>Skrzynia biegów (Street / Sports / Race Transmission)</h3>
+      <table class="guide-table">
+        <tr><th>Poziom</th><th>Efekt</th></tr>
+        <tr><td>Street Transmission</td><td>Wolne zmiany biegów — power delivery "z dziurami" podczas długiego poślizgu.</td></tr>
+        <tr><td>Sports Transmission</td><td>Szybsze zmiany, mniej strat mocy w trakcie driftu.</td></tr>
+        <tr><td>Race Transmission</td><td>Najszybsze zmiany biegów — auto szybciej wraca do pełnej mocy po każdej zmianie, co ułatwia utrzymanie stałego kąta na długim łuku.</td></tr>
+      </table>
+      <p><strong>Pod drift:</strong> zawsze <strong>Race Transmission</strong>.</p>
+    </div>
+
+    <div class="guide-section">
+      <span class="guide-tag">LS Customs → Suspension</span>
+      <h3>Zawieszenie (Lowered / Street / Sport / Competition Suspension)</h3>
+      <table class="guide-table">
+        <tr><th>Poziom</th><th>Efekt</th></tr>
+        <tr><td>Lowered Suspension</td><td>Obniża nadwozie, poprawia estetykę i nieco środek ciężkości, ale samo w sobie daje mały efekt na prowadzenie.</td></tr>
+        <tr><td>Street Suspension</td><td>Zauważalnie mniejsze przechyły nadwozia w zakręcie.</td></tr>
+        <tr><td>Sport Suspension</td><td>Sztywniejsze ustawienie — szybsza reakcja na skręt kierownicą, łatwiejsza inicjacja poślizgu.</td></tr>
+        <tr><td>Competition Suspension</td><td>Najsztywniejsze i najbardziej precyzyjne — najlepsze do utrzymywania stałego kąta driftu na torze.</td></tr>
+      </table>
+      <p><strong>Pod drift:</strong> najwyższy dostępny poziom (Sport lub Competition, zależnie od auta).</p>
+    </div>
+
+    <div class="guide-section">
+      <span class="guide-tag">LS Customs → Engine</span>
+      <h3>Silnik (EMS Upgrade Kit 1 / 2 / 3 / 4)</h3>
+      <p>Każdy poziom EMS Upgrade Kit zwiększa moc i przyspieszenie. Więcej mocy = łatwiej wywołać i podtrzymać poślizg samym gazem, bez szarpania kierownicą — ale zbyt duża moc przy słabym opanowaniu kontry kończy się "przekręceniem" i wypadnięciem z toru.</p>
+      <p><strong>Pod drift:</strong> Poziom 2–3 (EMS Upgrade Kit 2/3) wystarcza do nauki; Poziom 4 dla osób, które opanowały kontrolę kontrą.</p>
+    </div>
+
+    <div class="guide-section">
+      <span class="guide-tag">LS Customs → Engine (Turbo Tuning)</span>
+      <h3>Turbo</h3>
+      <p>Osobny checkbox "Turbo Tuning" w sekcji silnika. Poprawia odpowiedź na gaz i redukuje turbo lag — dzięki temu łatwiej utrzymać stały, płynny poślizg na dłuższych łukach zamiast skokowego przyrostu mocy.</p>
+      <p><strong>Pod drift:</strong> włączaj zawsze, jeśli auto ma tę opcję dostępną.</p>
+    </div>
+
+    <div class="guide-section">
+      <span class="guide-tag">LS Customs → Armor</span>
+      <h3>Pancerz (Armor Upgrade 1 / 2 / 3 / 4)</h3>
+      <p>Każdy poziom pancerza dodaje wagę pojazdu. Cięższe auto wolniej reaguje na gaz i kierownicę — trudniej zainicjować poślizg i trudniej korygować kąt w locie.</p>
+      <p><strong>Pod drift:</strong> zostaw na poziomie 0 (bez pancerza) albo maksymalnie poziom 1 — priorytetem jest niska waga, nie ochrona.</p>
+    </div>
+
+    <div class="guide-section">
+      <span class="guide-tag">LS Customs → Wheels &amp; Tyre Smoke</span>
+      <h3>Felgi i dymiące opony (Tyre Smoke)</h3>
+      <p>W standardowej grze zmiana felg jest głównie kosmetyczna i nie daje realnej przewagi w przyczepności — liczy się jednak, żeby unikać felg terenowych/off-road, bo te obniżają przyczepność na asfalcie. "Tyre Smoke" (kolor dymu z opon) jest czysto kosmetyczny, ale świetnie podkreśla efektowność driftu na nagraniach.</p>
+      <p><strong>Pod drift:</strong> zwykłe felgi sportowe/szosowe; Tyre Smoke ustaw dowolnie — wpływu na jazdę nie ma.</p>
+    </div>
+
+    <div class="guide-section">
+      <span class="guide-tag">Wyłącznie u Benny'ego (Benny's Original Motor Works)</span>
+      <h3>Drift Tune Suspension i poszerzone nadwozie</h3>
+      <p>Dla pojazdów obsługiwanych przez Benny'ego (kolumna "Okleiny" w katalogu) dostępna bywa specjalna opcja zawieszenia <strong>Drift Tune</strong> — od razu zmienia geometrię i sztywność zawieszenia na w pełni driftową, bez potrzeby ręcznego dobierania ustawień. Poszerzone nadwozie (widebody) zwiększa też maksymalny kąt skrętu przednich kół, co pozwala jechać bokiem pod głębszym kątem — kluczowe w tandem drifcie.</p>
+      <p><strong>Pod drift:</strong> jeśli auto ma tę opcję u Benny'ego — zawsze warto ją wykupić, to najszybsza droga do gotowego setupu driftowego.</p>
+    </div>
+
+    <div class="guide-section">
+      <h3>Skrócona checklista zakupów w LS Customs — kolejność</h3>
+      <ol class="guide-list">
+        <li><strong>1. Race Brakes</strong> — hamulce na maksa, potrzebne do inicjacji.</li>
+        <li><strong>2. Race Transmission</strong> — najszybsze zmiany biegów.</li>
+        <li><strong>3. Sport/Competition Suspension</strong> — sztywne, precyzyjne zawieszenie.</li>
+        <li><strong>4. EMS Upgrade Kit 2–3 + Turbo Tuning</strong> — moc dobierana stopniowo do umiejętności.</li>
+        <li><strong>5. Armor na 0</strong> — nie dokładaj zbędnej wagi.</li>
+        <li><strong>6. Drift Tune u Benny'ego</strong>, jeśli auto je obsługuje — gotowy setup w jednym zakupie.</li>
+      </ol>
+    </div>
+
+    <div class="guide-section">
+      <h3>Technika jazdy — na skróty</h3>
+      <ul class="guide-list">
+        <li><strong>Inicjacja hamulcem ręcznym</strong> — krótkie szarpnięcie hamulca ręcznego przy wejściu w zakręt gwałtownie odrywa tył od podłoża.</li>
+        <li><strong>Feint (kontra-skręt)</strong> — szybki skręt w przeciwną stronę tuż przed zakrętem przenosi masę i "wystrzeliwuje" tył w poślizg bez użycia hamulca ręcznego.</li>
+        <li><strong>Kontrola gazem</strong> — utrzymywanie stałego, umiarkowanego gazu podtrzymuje poślizg; gwałtowne dodanie gazu zwiększa kąt, puszczenie gazu go zmniejsza.</li>
+        <li><strong>Kontra kierownicą</strong> — kierownica skręcona w stronę przeciwną do poślizgu, płynnie korygowana w miarę zmiany kąta.</li>
+        <li><strong>Patrzenie w punkt wyjścia zakrętu</strong>, nie na przeszkody — ułatwia płynne prowadzenie długiego poślizgu.</li>
+      </ul>
+    </div>
+  `;
+}
+
+document.getElementById("search").addEventListener("input", (e) => {
+  searchTerm = e.target.value;
+  renderTable();
+});
+document.getElementById("status-filter").addEventListener("change", (e) => {
+  statusFilter = e.target.value;
+  renderTable();
+});
+document.getElementById("sort-select").addEventListener("change", (e) => {
+  sortBy = e.target.value;
+  renderTable();
+});
+document.getElementById("reset-link").addEventListener("click", async () => {
+  if(!confirm("Na pewno wyczyścić wszystkie statusy i przypisania?")) return;
+  state = {};
+  await window.storage.set(STORAGE_KEY, JSON.stringify(state), false);
+  render();
+});
+
+function openModal(car){
+  const info = LOOKUP[car.name];
+  const overlay = document.getElementById("modal-overlay");
+  const content = document.getElementById("modal-content");
+
+  if(!info){
+    content.innerHTML = `
+      <div class="modal-head">
+        <h2 class="modal-title">${car.name}</h2>
+        <button class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-cat">${car.category} · ocena ${car.rating.toFixed(1)}</div>
+      <div class="modal-section-body">Brak jeszcze szczegółowych danych dla tego pojazdu.</div>
+    `;
+  }else{
+    const liveryClass = info.livery.startsWith("Tak") ? "livery-yes" : "livery-no";
+    content.innerHTML = `
+      <div class="modal-head">
+        <h2 class="modal-title">${car.name}</h2>
+        <button class="modal-close" id="modal-close">&times;</button>
+      </div>
+      <div class="modal-cat">${car.category} · ocena ${car.rating.toFixed(1)}</div>
+
+      ${info.photo ? `<img class="modal-photo-img" src="${info.photo}" alt="${car.name}">` : `
+      <a class="modal-photo-link" href="${info.wiki}" target="_blank" rel="noopener">
+        <svg class="photo-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10.5" r="1.5"/><path d="M21 15l-5-5-4 4-3-3-6 6"/></svg>
+        <span>Zdjęcie nie jest jeszcze wbudowane w bazę.</span>
+        <span class="photo-cta">Szukaj na GTABase ↗</span>
+      </a>`}
+
+      <div class="modal-grid">
+        <div class="modal-section">
+          <div class="modal-section-label">Odpowiednik IRL</div>
+          <div class="modal-section-body">${info.real}</div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-label">Kraj pochodzenia</div>
+          <div class="modal-section-body">${info.country}</div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-label">Napęd / silnik (w grze)</div>
+          <div class="modal-section-body">${info.drivetrain}</div>
+        </div>
+        <div class="modal-section">
+          <div class="modal-section-label">Okleiny / widebody</div>
+          <div class="modal-section-body ${liveryClass}">${info.livery}</div>
+        </div>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-section-label">Jak przerobić na drift/wyścigówkę (FiveM)</div>
+        <div class="modal-section-body">${info.drift}</div>
+      </div>
+
+      <div class="modal-footnote">Dane odpowiednika IRL, napędu i oklein pochodzą z ogólnej wiedzy o grze i mogły się zmienić w aktualizacjach — zweryfikuj dokładne specyfikacje, zdjęcia i dostępność oklein w LS Customs / u Benny'ego, a także na powyższym linku do GTABase.</div>
+    `;
+  }
+
+  overlay.classList.add("open");
+  document.getElementById("modal-close").onclick = closeModal;
+}
+
+function closeModal(){
+  document.getElementById("modal-overlay").classList.remove("open");
+}
+
+document.getElementById("modal-overlay").addEventListener("click", (e) => {
+  if(e.target.id === "modal-overlay") closeModal();
+});
+document.addEventListener("keydown", (e) => {
+  if(e.key === "Escape") closeModal();
+});
+
+(async function init(){
+  await loadState();
+  render();
+})();
+</script>
+</body>
+</html>
